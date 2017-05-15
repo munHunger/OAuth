@@ -1,0 +1,33 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+  	http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+    <!-- Application Beans -->
+    <context:component-scan base-package="se.tfmoney.microservice.tfMSSOMicro"/>
+
+    <!-- Swagger Beans -->
+    <bean id="apiListingResource" class="io.swagger.jaxrs.listing.ApiListingResource"/>
+    <bean id="swaggerSerializers" class="io.swagger.jaxrs.listing.SwaggerSerializers" scope="singleton"/>
+
+    <!-- Swagger Configuration -->
+    <bean id="beanConfig" class="io.swagger.jaxrs.config.BeanConfig">
+        <property name="schemes" value="http"/>
+        <property name="filterClass"
+                  value="se.tfmoney.microservice.tfMCCMicro.util.swagger.ApiAuthorizationFilterImpl"/>
+        <property name="resourcePackage" value="se.tfmoney.microservice.tfMSSOMicro.contract"/>
+        <property name="version" value="0.0.1"/>
+        <property name="host" value=""/>
+        <property name="basePath" value="/api"/>
+        <property name="title" value="24Money Single Sign On Microservice"/>
+        <property name="description" value="A microservice for SSO"/>
+        <property name="contact" value="marcus.munger@24money.se"/>
+        <property name="scan" value="true"/>
+    </bean>
+
+    <!-- API Origin Filter -->
+    <bean id="apiOriginFilter" class="se.tfmoney.microservice.tfMSSOMicro.util.swagger.ApiOriginFilter"/>
+
+</beans>

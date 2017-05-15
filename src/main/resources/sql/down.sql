@@ -1,0 +1,1 @@
+DROP DATABASE `24mccmicro`;
