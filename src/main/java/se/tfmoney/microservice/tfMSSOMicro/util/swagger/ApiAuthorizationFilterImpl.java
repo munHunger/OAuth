@@ -38,10 +38,13 @@ public class ApiAuthorizationFilterImpl implements SwaggerSpecFilter
                                   Map<String, List<String>> headers)
     {
         boolean isAuthorized = checkKey(params, headers);
+        return true;
+        /*
         if ("internal".equals(parameter.getAccess()) && !isAuthorized)
             return false;
         else
             return true;
+            */
     }
 
     @Override

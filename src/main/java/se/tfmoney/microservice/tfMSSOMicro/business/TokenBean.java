@@ -13,6 +13,7 @@ import org.apache.oltu.oauth2.common.message.OAuthResponse;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
 import org.springframework.stereotype.Component;
 import se.tfmoney.microservice.tfMSSOMicro.contract.Token;
+import se.tfmoney.microservice.tfMSSOMicro.util.Database;
 import se.tfmoney.microservice.tfMSSOMicro.util.properties.Settings;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,10 +27,13 @@ import javax.ws.rs.core.Response;
 @Component //TODO: is this strictly needed
 public class TokenBean implements Token
 {
+    private Database database = Database.getSingleton();
+
+    @Context
+    HttpServletRequest request;
+
     @Override
-    public Response authorize(
-            @Context
-                    HttpServletRequest request) throws OAuthSystemException
+    public Response authorize() throws OAuthSystemException
     {
         try
         {
@@ -70,7 +74,7 @@ public class TokenBean implements Token
             }
 
             final String accessToken = oauthIssuerImpl.accessToken();
-            //database.addToken(accessToken);
+            database.addToken(accessToken);
 
             OAuthResponse response = OAuthASResponse.tokenResponse(HttpServletResponse.SC_OK)
                                                     .setAccessToken(accessToken)
@@ -84,6 +88,12 @@ public class TokenBean implements Token
                                                .buildJSONMessage();
             return Response.status(res.getResponseStatus()).entity(res.getBody()).build();
         }
+    }
+
+    @Override
+    public Response test()
+    {
+        return Response.ok("Hello World!").build();
     }
 
     private Response buildInvalidClientIdResponse() throws OAuthSystemException
@@ -124,18 +134,17 @@ public class TokenBean implements Token
 
     private boolean checkClientId(String clientId)
     {
-        return true;
+        return Settings.getStringSetting("client_id").equals(clientId);
     }
 
     private boolean checkClientSecret(String secret)
     {
-        return true;
+        return Settings.getStringSetting("client_secret").equals(secret);
     }
 
     private boolean checkAuthCode(String authCode)
     {
-        //return database.isValidAuthCode(authCode);
-        return true;
+        return database.isValidAuthCode(authCode);
     }
 
     private boolean checkUserPass(String user, String pass)

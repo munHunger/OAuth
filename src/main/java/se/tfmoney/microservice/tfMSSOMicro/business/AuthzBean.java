@@ -12,6 +12,7 @@ import org.apache.oltu.oauth2.common.message.types.ResponseType;
 import org.apache.oltu.oauth2.common.utils.OAuthUtils;
 import org.springframework.stereotype.Component;
 import se.tfmoney.microservice.tfMSSOMicro.contract.Authz;
+import se.tfmoney.microservice.tfMSSOMicro.util.Database;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,10 +28,13 @@ import java.net.URISyntaxException;
 @Component
 public class AuthzBean implements Authz
 {
+    private Database database = Database.getSingleton();
+
+    @Context
+    HttpServletRequest request;
+
     @Override
-    public Response authorize(
-            @Context
-                    HttpServletRequest request) throws URISyntaxException, OAuthSystemException
+    public Response authorize() throws URISyntaxException, OAuthSystemException
     {
         try
         {
@@ -46,13 +50,13 @@ public class AuthzBean implements Authz
             if (responseType.equals(ResponseType.CODE.toString()))
             {
                 final String authorizationCode = oauthIssuerImpl.authorizationCode();
-                //database.addAuthCode(authorizationCode);
+                database.addAuthCode(authorizationCode);
                 builder.setCode(authorizationCode);
             }
             if (responseType.equals(ResponseType.TOKEN.toString()))
             {
                 final String accessToken = oauthIssuerImpl.accessToken();
-                //database.addToken(accessToken);
+                database.addToken(accessToken);
 
                 builder.setAccessToken(accessToken);
                 builder.setExpiresIn(3600l);

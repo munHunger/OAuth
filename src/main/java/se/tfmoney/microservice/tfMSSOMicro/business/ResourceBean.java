@@ -11,6 +11,7 @@ import org.apache.oltu.oauth2.rs.request.OAuthAccessResourceRequest;
 import org.apache.oltu.oauth2.rs.response.OAuthRSResponse;
 import org.springframework.stereotype.Component;
 import se.tfmoney.microservice.tfMSSOMicro.contract.Resource;
+import se.tfmoney.microservice.tfMSSOMicro.util.Database;
 import se.tfmoney.microservice.tfMSSOMicro.util.properties.Settings;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,10 +25,13 @@ import javax.ws.rs.core.Response;
 @Component
 public class ResourceBean implements Resource
 {
+    private Database database = Database.getSingleton();
+
+    @Context
+    HttpServletRequest request;
+
     @Override
-    public Response get(
-            @Context
-                    HttpServletRequest request) throws OAuthSystemException
+    public Response get() throws OAuthSystemException
     {
         try
         {
@@ -37,7 +41,7 @@ public class ResourceBean implements Resource
             String accessToken = oauthRequest.getAccessToken();
 
             // Validate the access token
-            if (true) // (!database.isValidToken(accessToken))
+            if (!database.isValidToken(accessToken))
             {
                 // Return the OAuth error message
                 OAuthResponse oauthResponse = OAuthRSResponse.errorResponse(HttpServletResponse.SC_UNAUTHORIZED)
