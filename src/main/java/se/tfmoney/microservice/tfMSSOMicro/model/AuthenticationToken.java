@@ -1,20 +1,50 @@
 package se.tfmoney.microservice.tfMSSOMicro.model;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import com.google.gson.annotations.Expose;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.io.Serializable;
 
 /**
  * Created by Marcus Münger on 2017-05-12.
  */
-@XmlRootElement(name = "AuthenticationToken")
-@ApiModel(
-        description = "A public used authentication token. This token, if valid is all that is needed to get privileges to the systems")
-public class AuthenticationToken
+@Entity
+@Table(name = "authentication_token")
+public class AuthenticationToken implements Serializable
 {
-    @XmlElement(name = "token")
-    @ApiModelProperty(name = "token", value = "The unique authentication token ID", example = "RsT5OjbzRn430zqMLgV3Ia")
-    public String token;
+    @Id
+    @Column(name = "auth_token")
+    public String authToken;
+
+    @Id
+    @Column(name = "access_token")
+    public String accessToken;
+
+    @Column(name = "client_id")
+    @Expose(serialize = false, deserialize = false)
+    public String clientID;
+
+    @Column(name = "username")
+    @Expose(serialize = false, deserialize = false)
+    public String username;
+
+    @Column(name = "expiration_date")
+    @Expose(serialize = false, deserialize = false)
+    public String expirationDate;
+
+    public AuthenticationToken()
+    {}
+
+    public AuthenticationToken(String authToken, String accessToken, String clientID, String username,
+                               String expirationDate)
+    {
+        this.authToken = authToken;
+        this.accessToken = accessToken;
+        this.clientID = clientID;
+        this.username = username;
+        this.expirationDate = expirationDate;
+    }
 }

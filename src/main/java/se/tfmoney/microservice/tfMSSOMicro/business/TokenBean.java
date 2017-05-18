@@ -1,86 +1,67 @@
 package se.tfmoney.microservice.tfMSSOMicro.business;
 
-import org.apache.oltu.oauth2.as.issuer.MD5Generator;
-import org.apache.oltu.oauth2.as.issuer.OAuthIssuer;
-import org.apache.oltu.oauth2.as.issuer.OAuthIssuerImpl;
 import org.apache.oltu.oauth2.as.request.OAuthTokenRequest;
 import org.apache.oltu.oauth2.as.response.OAuthASResponse;
-import org.apache.oltu.oauth2.common.OAuth;
-import org.apache.oltu.oauth2.common.error.OAuthError;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
-import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
-import org.apache.oltu.oauth2.common.message.types.GrantType;
 import org.springframework.stereotype.Component;
 import se.tfmoney.microservice.tfMSSOMicro.contract.Token;
-import se.tfmoney.microservice.tfMSSOMicro.util.Database;
-import se.tfmoney.microservice.tfMSSOMicro.util.properties.Settings;
+import se.tfmoney.microservice.tfMSSOMicro.model.AuthenticationToken;
+import se.tfmoney.microservice.tfMSSOMicro.util.database.jpa.Database;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- * Created by Marcus Münger on 2017-05-15.
+ * Created by Marcus Münger on 2017-05-16.
  */
-@Component //TODO: is this strictly needed
+@Component
 public class TokenBean implements Token
 {
-    private Database database = Database.getSingleton();
-
     @Context
-    HttpServletRequest request;
+    private HttpServletRequest servletRequest;
 
     @Override
-    public Response authorize() throws OAuthSystemException
+    public Response authorize() throws Exception
     {
         try
         {
-            OAuthTokenRequest oauthRequest = new OAuthTokenRequest(request);
-            OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
+            OAuthTokenRequest oauthRequest = new OAuthTokenRequest(servletRequest);
 
-            // check if clientid is valid
-            if (!checkClientId(oauthRequest.getClientId()))
-            {
-                return buildInvalidClientIdResponse();
-            }
+            Map<String, Object> params = new HashMap<>();
+            params.put("id", oauthRequest.getClientId());
+            params.put("secret", org.apache.commons.codec.digest.DigestUtils.sha256Hex(oauthRequest.getClientSecret()));
+            boolean validClientCredentials = !Database.getObjects(
+                    "from RegisteredClient WHERE clientID = :id AND clientSecret = :secret", params).isEmpty();
 
-            // check if client_secret is valid
-            if (!checkClientSecret(oauthRequest.getClientSecret()))
+            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            params = new HashMap<>();
+            params.put("token", oauthRequest.getCode());
+            params.put("clientID", oauthRequest.getClientId());
+            params.put("date", formatter.format(Calendar.getInstance().getTime()));
+            if (validClientCredentials)
             {
-                return buildInvalidClientSecretResponse();
-            }
-
-            // do checking for different grant types
-            if (oauthRequest.getParam(OAuth.OAUTH_GRANT_TYPE).equals(GrantType.AUTHORIZATION_CODE.toString()))
-            {
-                if (!checkAuthCode(oauthRequest.getParam(OAuth.OAUTH_CODE)))
+                List token = Database.getObjects(
+                        "from AuthenticationToken WHERE authToken = :token AND clientID = :clientID AND expirationDate > date(:date)",
+                        params);
+                if (!token.isEmpty())
                 {
-                    return buildBadAuthCodeResponse();
+                    String accessToken = ((AuthenticationToken) token.get(0)).accessToken;
+                    OAuthResponse response = OAuthASResponse.tokenResponse(HttpServletResponse.SC_OK)
+                                                            .setAccessToken(accessToken)
+                                                            .buildJSONMessage();
+                    return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
                 }
             }
-            else if (oauthRequest.getParam(OAuth.OAUTH_GRANT_TYPE).equals(GrantType.PASSWORD.toString()))
-            {
-                if (!checkUserPass(oauthRequest.getUsername(), oauthRequest.getPassword()))
-                {
-                    return buildInvalidUserPassResponse();
-                }
-            }
-            else if (oauthRequest.getParam(OAuth.OAUTH_GRANT_TYPE).equals(GrantType.REFRESH_TOKEN.toString()))
-            {
-                // refresh token is not supported in this implementation
-                buildInvalidUserPassResponse();
-            }
-
-            final String accessToken = oauthIssuerImpl.accessToken();
-            database.addToken(accessToken);
-
-            OAuthResponse response = OAuthASResponse.tokenResponse(HttpServletResponse.SC_OK)
-                                                    .setAccessToken(accessToken)
-                                                    .setExpiresIn("3600")
-                                                    .buildJSONMessage();
-            return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
+            return Response.status(HttpServletResponse.SC_UNAUTHORIZED).build();
         } catch (OAuthProblemException e)
         {
             OAuthResponse res = OAuthASResponse.errorResponse(HttpServletResponse.SC_BAD_REQUEST)
@@ -88,67 +69,5 @@ public class TokenBean implements Token
                                                .buildJSONMessage();
             return Response.status(res.getResponseStatus()).entity(res.getBody()).build();
         }
-    }
-
-    @Override
-    public Response test()
-    {
-        return Response.ok("Hello World!").build();
-    }
-
-    private Response buildInvalidClientIdResponse() throws OAuthSystemException
-    {
-        OAuthResponse response = OAuthASResponse.errorResponse(HttpServletResponse.SC_BAD_REQUEST)
-                                                .setError(OAuthError.TokenResponse.INVALID_CLIENT)
-                                                .setErrorDescription("Auth failed")
-                                                .buildJSONMessage();
-        return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
-    }
-
-    private Response buildInvalidClientSecretResponse() throws OAuthSystemException
-    {
-        OAuthResponse response = OAuthASResponse.errorResponse(HttpServletResponse.SC_UNAUTHORIZED)
-                                                .setError(OAuthError.TokenResponse.UNAUTHORIZED_CLIENT)
-                                                .setErrorDescription("Auth failed")
-                                                .buildJSONMessage();
-        return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
-    }
-
-    private Response buildBadAuthCodeResponse() throws OAuthSystemException
-    {
-        OAuthResponse response = OAuthASResponse.errorResponse(HttpServletResponse.SC_BAD_REQUEST)
-                                                .setError(OAuthError.TokenResponse.INVALID_GRANT)
-                                                .setErrorDescription("invalid authorization code")
-                                                .buildJSONMessage();
-        return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
-    }
-
-    private Response buildInvalidUserPassResponse() throws OAuthSystemException
-    {
-        OAuthResponse response = OAuthASResponse.errorResponse(HttpServletResponse.SC_BAD_REQUEST)
-                                                .setError(OAuthError.TokenResponse.INVALID_GRANT)
-                                                .setErrorDescription("invalid username or password")
-                                                .buildJSONMessage();
-        return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
-    }
-
-    private boolean checkClientId(String clientId)
-    {
-        return Settings.getStringSetting("client_id").equals(clientId);
-    }
-
-    private boolean checkClientSecret(String secret)
-    {
-        return Settings.getStringSetting("client_secret").equals(secret);
-    }
-
-    private boolean checkAuthCode(String authCode)
-    {
-        return database.isValidAuthCode(authCode);
-    }
-
-    private boolean checkUserPass(String user, String pass)
-    {
-        return Settings.getStringSetting("password").equals(pass) && Settings.getStringSetting("username").equals(user);
     }
 }

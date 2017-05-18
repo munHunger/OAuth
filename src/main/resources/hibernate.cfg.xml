@@ -14,7 +14,7 @@
         <!-- Assume test is the database name -->
         <property
                 name="hibernate.connection.url">
-            jdbc:mysql://localhost:3306/24mccmicro?useSSL=false
+            jdbc:mysql://localhost:3306/24mssomicro?useSSL=false
         </property>
         <property name="hibernate.connection.username">
             root
@@ -24,5 +24,9 @@
         </property>
 
         <!-- List of XML mapping files -->
+        <mapping class="se.tfmoney.microservice.tfMSSOMicro.model.client.RegisteredClient"/>
+        <mapping class="se.tfmoney.microservice.tfMSSOMicro.model.client.ClientURL"/>
+        <mapping class="se.tfmoney.microservice.tfMSSOMicro.model.user.User"/>
+        <mapping class="se.tfmoney.microservice.tfMSSOMicro.model.AuthenticationToken"/>
     </session-factory>
 </hibernate-configuration>

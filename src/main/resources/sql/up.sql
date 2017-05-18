@@ -1,25 +1,34 @@
-CREATE SCHEMA `24mccmicro` ;
+DROP DATABASE `24mssomicro`;
+CREATE SCHEMA `24mssomicro` ;
 
-CREATE TABLE `24mccmicro`.`beneficiary` (
-  `id` VARCHAR(50) NOT NULL,
-  `bank_account_holder_name` VARCHAR(75) NULL,
-  `name` VARCHAR(125) NULL,
-  `id_24money` VARCHAR(50) NULL,
-  `currency` VARCHAR(3) NULL,
-  `payment_type` VARCHAR(8) NULL,
-  `account_type` VARCHAR(10) NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC));
+CREATE TABLE `24mssomicro`.`client` (
+  `client_id` VARCHAR(32) NOT NULL,
+  `client_secret` VARCHAR(64) NOT NULL,
+  PRIMARY KEY (`client_id`),
+  UNIQUE INDEX `client_secret_UNIQUE` (`client_secret` ASC),
+  UNIQUE INDEX `client_id_UNIQUE` (`client_id` ASC));
 
-CREATE TABLE `24mccmicro`.`payment` (
-  `id` VARCHAR(40) NOT NULL,
-  `quick_pay` TINYINT NULL,
-  `short_reference` VARCHAR(20) NULL,
-  `conversion_id` VARCHAR(40) NULL,
-  `amount` INT NULL,
-  `currency` VARCHAR(3) NULL,
-  `reference` VARCHAR(256) NULL,
-  `payment_date` DATETIME NULL,
-  `status` VARCHAR(15) NULL,
-  `beneficiary_id` VARCHAR(40) NULL,
-  PRIMARY KEY (`id`));
+CREATE TABLE `24mssomicro`.`client_url` (
+  `client_id` VARCHAR(32) NOT NULL,
+  `url` VARCHAR(256) NOT NULL,
+  PRIMARY KEY (`client_id`, `url`),
+  CONSTRAINT `client`
+    FOREIGN KEY (`client_id`)
+    REFERENCES `24mssomicro`.`client` (`client_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+CREATE TABLE `24mssomicro`.`user` (
+  `username` VARCHAR(64) NOT NULL,
+  `password` VARCHAR(64) NOT NULL,
+  PRIMARY KEY (`username`),
+  UNIQUE INDEX `username_UNIQUE` (`username` ASC));
+
+CREATE TABLE `24mssomicro`.`authentication_token` (
+  `auth_token` VARCHAR(64) NOT NULL,
+  `access_token` VARCHAR(64) NOT NULL,
+  `client_id` VARCHAR(32) NOT NULL,
+  `username` VARCHAR(256) NOT NULL,
+  `expiration_date` DATETIME NOT NULL,
+  PRIMARY KEY (`auth_token`, `access_token`),
+  UNIQUE INDEX `auth_token_UNIQUE` (`auth_token` ASC));

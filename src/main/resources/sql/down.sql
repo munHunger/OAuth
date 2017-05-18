@@ -1,1 +1,1 @@
-DROP DATABASE `24mccmicro`;
+DROP DATABASE `24mssomicro`;
