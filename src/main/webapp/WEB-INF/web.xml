@@ -33,7 +33,7 @@
 
     <servlet>
         <servlet-name>SwaggerBootstrap</servlet-name>
-        <servlet-class>se.tfmoney.microservice.tfMSSOMicro.Main</servlet-class>
+        <servlet-class>se.tfmoney.microservice.oauth.Main</servlet-class>
         <load-on-startup>1</load-on-startup>
         <init-param>
             <param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
