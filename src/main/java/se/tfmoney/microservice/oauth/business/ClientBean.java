@@ -49,6 +49,7 @@ public class ClientBean implements Client
             Database.saveObjects(objectsToSave);
         } catch (Exception e)
         {
+            e.printStackTrace();
             return Response.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
                            .entity(new ErrorMessage("Could not create client",
                                                     "Could not save the object in the database"))
