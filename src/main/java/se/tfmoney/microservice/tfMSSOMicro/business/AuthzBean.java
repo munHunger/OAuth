@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import se.tfmoney.microservice.tfMSSOMicro.contract.Authz;
 import se.tfmoney.microservice.tfMSSOMicro.model.AuthenticationToken;
 import se.tfmoney.microservice.tfMSSOMicro.util.database.jpa.Database;
+import se.tfmoney.microservice.tfMSSOMicro.util.properties.Settings;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -82,7 +83,8 @@ public class AuthzBean implements Authz
                 String responseType = oauthRequest.getParam(OAuth.OAUTH_RESPONSE_TYPE);
                 if (ResponseType.CODE.toString().equals(responseType))
                     builder.setCode(authorizationCode);
-                else if (ResponseType.TOKEN.toString().equals(responseType))
+                else if (ResponseType.TOKEN.toString().equals(responseType) && "TRUE".equals(
+                        Settings.getStringSetting("allow_implicit_grant").toUpperCase()))
                 {
                     builder.setAccessToken(token.accessToken);
                     builder.setExpiresIn(3600l); // one hour
