@@ -3,11 +3,33 @@ version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: 'war'
+apply plugin: 'maven-publish'
 
 sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    mavenLocal()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId 'se.tfmoney.microservice'
+            artifactId 'oauth'
+            version '1.0-SNAPSHOT'
+
+            from components.java
+        }
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            url '../maven'
+        }
+    }
 }
 
 dependencies {
