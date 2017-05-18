@@ -58,7 +58,8 @@ public class AuthzBean implements Authz
 
             param = new HashMap<>();
             param.put("username", oauthRequest.getParam(OAuth.OAUTH_USERNAME));
-            param.put("password", org.apache.commons.codec.digest.DigestUtils.sha256Hex(OAuth.OAUTH_PASSWORD));
+            param.put("password", org.apache.commons.codec.digest.DigestUtils.sha256Hex(
+                    oauthRequest.getParam(OAuth.OAUTH_PASSWORD)));
             boolean isUserAuthenticated = !Database.getObjects(
                     "from User WHERE username = :username AND password = :password", param).isEmpty();
             if (isUserAuthenticated && clientExist && isUrlAuthorized)
