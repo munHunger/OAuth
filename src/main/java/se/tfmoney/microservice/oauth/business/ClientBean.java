@@ -9,6 +9,7 @@ import se.tfmoney.microservice.oauth.model.error.ErrorMessage;
 import se.tfmoney.microservice.oauth.util.database.jpa.Database;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -29,6 +30,7 @@ public class ClientBean
 {
     @POST
     @Path("/client")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Registers a new client",
                   notes = "Registers a new client as part of the SSO group. Note that this is not a user, it is merely a middleware")
