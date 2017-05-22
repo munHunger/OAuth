@@ -27,6 +27,7 @@
         <mapping class="se.tfmoney.microservice.oauth.model.client.RegisteredClient"/>
         <mapping class="se.tfmoney.microservice.oauth.model.client.ClientURL"/>
         <mapping class="se.tfmoney.microservice.oauth.model.user.User"/>
+        <mapping class="se.tfmoney.microservice.oauth.model.user.UserRoles"/>
         <mapping class="se.tfmoney.microservice.oauth.model.AuthenticationToken"/>
     </session-factory>
 </hibernate-configuration>

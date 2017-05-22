@@ -24,6 +24,12 @@ CREATE TABLE `24mssomicro`.`user` (
   PRIMARY KEY (`username`),
   UNIQUE INDEX `username_UNIQUE` (`username` ASC));
 
+CREATE TABLE `24mssomicro`.`roles` (
+  `username` VARCHAR(64) NOT NULL,
+  `role` VARCHAR(32) NOT NULL,
+  PRIMARY KEY (`username`),
+  UNIQUE INDEX `username_UNIQUE` (`username` ASC));
+
 CREATE TABLE `24mssomicro`.`authentication_token` (
   `auth_token` VARCHAR(64) NOT NULL,
   `access_token` VARCHAR(64) NOT NULL,
