@@ -1,5 +1,8 @@
 package se.tfmoney.microservice.oauth.business;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.apache.oltu.oauth2.as.issuer.MD5Generator;
 import org.apache.oltu.oauth2.as.issuer.OAuthIssuerImpl;
 import org.apache.oltu.oauth2.as.request.OAuthAuthzRequest;
@@ -11,15 +14,15 @@ import org.apache.oltu.oauth2.common.message.OAuthResponse;
 import org.apache.oltu.oauth2.common.message.types.ResponseType;
 import org.apache.oltu.oauth2.common.utils.OAuthUtils;
 import org.springframework.stereotype.Component;
-import se.tfmoney.microservice.oauth.contract.Authz;
 import se.tfmoney.microservice.oauth.model.AuthenticationToken;
 import se.tfmoney.microservice.oauth.util.database.jpa.Database;
 import se.tfmoney.microservice.oauth.util.properties.Settings;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -33,14 +36,37 @@ import java.util.Map;
  * Created by Marcus Münger on 2017-05-16.
  */
 @Component
-public class AuthzBean implements Authz
+@Path("/oauth")
+@Api(value = "OAuth", description = "Creates authorization requests")
+public class AuthzBean
 {
     @Context
     private HttpServletRequest servletRequest;
 
-    //Internal request
-    @Override
-    public Response authenticateRequest() throws Exception
+    @POST
+    @Path("/authz")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Authenticates a user",
+                  notes = "Authenticates a user and returns either an access token or an authentication token depending on what is requested and what the client allows. If authenticated the user will be redirected to the redirect_uri with the url-pattern: {redirect_uri}(#access_token={access_token}&expires_in={time})|(?code={auth_token})")
+    public Response authenticateRequest(
+            @ApiParam(value = "The username of the user to authenticate", example = "DudeMaster43")
+            @QueryParam("username")
+                    String username,
+            @ApiParam(value = "The password of the user to authenticate", example = "S0s3cUR3")
+            @QueryParam("password")
+                    String password,
+            @ApiParam(value = "The URL to redirect to. This must be a registered URL for the client",
+                      example = "http://localhost:9090/swagger")
+            @QueryParam("redirect_uri")
+                    String redirectUri,
+            @ApiParam(value = "The ID of the client to login against", example = "id75pvdb25j3e7dr2d6gjsmplb18v2i2")
+            @QueryParam("client_id")
+                    String clientID,
+            @ApiParam(
+                    value = "The type of response/authentication to use. If token, then the authentication will be an IMPLICIT_GRANT and the client must support that type. Otherwise it will be a CODE_GRANT",
+                    defaultValue = "token", allowableValues = "token, code")
+            @QueryParam("response_type")
+                    String type) throws Exception
     {
         try
         {
