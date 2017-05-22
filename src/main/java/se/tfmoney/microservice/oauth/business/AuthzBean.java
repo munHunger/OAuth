@@ -47,7 +47,7 @@ public class AuthzBean
     @Path("/authz")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Authenticates a user",
-                  notes = "Authenticates a user and returns either an access token or an authentication token depending on what is requested and what the client allows")
+                  notes = "Authenticates a user and returns either an access token or an authentication token depending on what is requested and what the client allows. If authenticated the user will be redirected to the redirect_uri with the url-pattern: {redirect_uri}(#access_token={access_token}&expires_in={time})|(?code={auth_token})")
     public Response authenticateRequest(
             @ApiParam(value = "The username of the user to authenticate", example = "DudeMaster43")
             @QueryParam("username")

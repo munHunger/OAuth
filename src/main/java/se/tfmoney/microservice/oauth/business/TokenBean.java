@@ -42,8 +42,7 @@ public class TokenBean
     @Path("/token")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Converts an authentication token to an access token",
-                  notes = "A login endpoint for client to convert a users authentication token into an access token. After authentication the user will be redirected to the specified URI")
-    //TODO: Add text about how to get resulting token
+                  notes = "A login endpoint for client to convert a users authentication token into an access token. After authentication the user will be redirected to the specified URI with the url-pattern: {redirect_uri}#access_token={access_token}&expires_in={time}")
     public Response authorize(
             @ApiParam(value = "Authentication type", allowableValues = "authorization_code")
             @QueryParam("grant_type")
