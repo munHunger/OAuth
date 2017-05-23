@@ -16,6 +16,7 @@ import org.apache.oltu.oauth2.common.utils.OAuthUtils;
 import org.springframework.stereotype.Component;
 import se.tfmoney.microservice.oauth.model.AuthenticationToken;
 import se.tfmoney.microservice.oauth.util.database.jpa.Database;
+import se.tfmoney.microservice.oauth.util.jwt.JSONWebToken;
 import se.tfmoney.microservice.oauth.util.properties.Settings;
 
 import javax.servlet.http.HttpServletRequest;
@@ -116,6 +117,9 @@ public class AuthzBean
                     builder.setAccessToken(token.accessToken);
                     builder.setExpiresIn(3600l); // one hour
                 }
+
+                JSONWebToken.buildToken("token", oauthRequest.getClientId(),
+                                        oauthRequest.getParam(OAuth.OAUTH_USERNAME), 36000);
 
                 String redirectURI = oauthRequest.getParam(OAuth.OAUTH_REDIRECT_URI);
                 final OAuthResponse response = builder.location(redirectURI).buildQueryMessage();
