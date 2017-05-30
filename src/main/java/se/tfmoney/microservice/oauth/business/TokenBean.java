@@ -8,7 +8,9 @@ import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 import org.springframework.stereotype.Component;
 import se.tfmoney.microservice.oauth.model.AuthenticationToken;
+import se.tfmoney.microservice.oauth.model.user.User;
 import se.tfmoney.microservice.oauth.util.database.jpa.Database;
+import se.tfmoney.microservice.oauth.util.jwt.JSONWebToken;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -79,9 +81,12 @@ public class TokenBean
                         params);
                 if (!token.isEmpty())
                 {
-                    String accessToken = ((AuthenticationToken) token.get(0)).accessToken;
+                    AuthenticationToken authToken = (AuthenticationToken) token.get(0);
+                    String accessToken = authToken.accessToken;
+                    String jwt = JSONWebToken.buildToken(accessToken, clientID,
+                                                         new User(authToken.username, null).getRolesCSV(), 36000);
                     OAuthResponse response = OAuthASResponse.tokenResponse(HttpServletResponse.SC_OK)
-                                                            .setAccessToken(accessToken)
+                                                            .setAccessToken(jwt)
                                                             .buildJSONMessage();
                     return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
                 }

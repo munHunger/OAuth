@@ -1,5 +1,6 @@
 package se.tfmoney.microservice.oauth.util.jwt;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -14,7 +15,7 @@ import java.util.Date;
  */
 public class JSONWebToken
 {
-    private static String secret = "so secret that no one will notice"; //TODO: read this from settings file
+    public static String secret = "shhitisasecret"; //TODO: read this from settings file
 
     public static String buildToken(String id, String issuer, String subject, long ttlMillis)
     {
@@ -41,5 +42,14 @@ public class JSONWebToken
         }
 
         return builder.compact();
+    }
+
+    public static Claims decryptToken(String jwt) throws Exception
+    {
+        Claims claims = Jwts.parser()
+                            .setSigningKey(DatatypeConverter.parseBase64Binary(secret))
+                            .parseClaimsJws(jwt)
+                            .getBody();
+        return claims;
     }
 }

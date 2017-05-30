@@ -15,6 +15,7 @@ import org.apache.oltu.oauth2.common.message.types.ResponseType;
 import org.apache.oltu.oauth2.common.utils.OAuthUtils;
 import org.springframework.stereotype.Component;
 import se.tfmoney.microservice.oauth.model.AuthenticationToken;
+import se.tfmoney.microservice.oauth.model.user.User;
 import se.tfmoney.microservice.oauth.util.database.jpa.Database;
 import se.tfmoney.microservice.oauth.util.jwt.JSONWebToken;
 import se.tfmoney.microservice.oauth.util.properties.Settings;
@@ -114,12 +115,10 @@ public class AuthzBean
                 else if (ResponseType.TOKEN.toString().equals(responseType) && "TRUE".equals(
                         Settings.getStringSetting("allow_implicit_grant").toUpperCase()))
                 {
-                    builder.setAccessToken(token.accessToken);
-                    builder.setExpiresIn(3600l); // one hour
+                    String jwt = JSONWebToken.buildToken(token.accessToken, oauthRequest.getClientId(),
+                                                         new User(username, null).getRolesCSV(), 36000);
+                    builder.setAccessToken(jwt);
                 }
-
-                JSONWebToken.buildToken("token", oauthRequest.getClientId(),
-                                        oauthRequest.getParam(OAuth.OAUTH_USERNAME), 36000);
 
                 String redirectURI = oauthRequest.getParam(OAuth.OAUTH_REDIRECT_URI);
                 final OAuthResponse response = builder.location(redirectURI).buildQueryMessage();
