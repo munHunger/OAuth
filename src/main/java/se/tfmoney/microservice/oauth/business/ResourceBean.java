@@ -28,7 +28,8 @@ public class ResourceBean
                     String accessToken) throws Exception
     {
         if (OAuthUtils.isAuthenticated(accessToken))
-            return Response.ok("{\"authenticated\":true}").build();
+            return Response.ok(
+                    "{\"authenticated\":true, \"isUser\":" + OAuthUtils.hasAnyRole(accessToken, "USER") + "}").build();
         else
             return Response.status(HttpServletResponse.SC_UNAUTHORIZED).build();
     }

@@ -39,6 +39,8 @@ public class OAuthUtils
 
     public static boolean hasAnyRole(String accessToken, String... acceptedRoles) throws Exception
     {
+        if (accessToken.toUpperCase().startsWith("BEARER "))
+            accessToken = accessToken.substring("BEARER ".length());
         List<String> accepted = Arrays.asList(acceptedRoles);
         Claims claims;
         try

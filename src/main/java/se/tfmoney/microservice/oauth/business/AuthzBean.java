@@ -116,7 +116,7 @@ public class AuthzBean
                         Settings.getStringSetting("allow_implicit_grant").toUpperCase()))
                 {
                     String jwt = JSONWebToken.buildToken(token.accessToken, oauthRequest.getClientId(),
-                                                         new User(username, null).getRolesCSV(), 36000);
+                                                         new User(username, null).getRolesCSV(), 3600000);
                     builder.setAccessToken(jwt);
                 }
 
