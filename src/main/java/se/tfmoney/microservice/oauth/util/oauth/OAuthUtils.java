@@ -26,7 +26,8 @@ public class OAuthUtils
             claims = JSONWebToken.decryptToken(Settings.getStringSetting("jwt_key"), accessToken);
             boolean correctAudience = Arrays.asList(claims.getAudience().split(";"))
                                             .contains(Settings.getStringSetting("client_id"));
-            return correctAudience;
+            boolean correctIssuer = claims.getIssuer().equals(Settings.getStringSetting("issuer_id"));
+            return correctIssuer && correctAudience;
         } catch (Exception e)
         {
             return false;
@@ -51,9 +52,10 @@ public class OAuthUtils
             claims = JSONWebToken.decryptToken(Settings.getStringSetting("jwt_key"), accessToken);
             boolean correctAudience = Arrays.asList(claims.getAudience().split(";"))
                                             .contains(Settings.getStringSetting("client_id"));
-            return correctAudience && Arrays.stream(claims.getSubject().split(";"))
-                                            .filter(role -> accepted.contains(role))
-                                            .count() > 0;
+            boolean correctIssuer = claims.getIssuer().equals(Settings.getStringSetting("issuer_id"));
+            return correctAudience && correctIssuer && Arrays.stream(claims.getSubject().split(";"))
+                                                             .filter(role -> accepted.contains(role))
+                                                             .count() > 0;
         } catch (Exception e)
         {
             return false;

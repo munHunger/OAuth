@@ -89,7 +89,8 @@ public class TokenBean
                     String accessToken = authToken.accessToken;
                     String jwt = JSONWebToken.buildToken(client.jwtKey, accessToken,
                                                          Settings.getStringSetting("issuer_id"),
-                                                         new User(authToken.username, null).getRolesCSV(), clientID,
+                                                         new User(authToken.username,
+                                                                  null).getRolesCSV() + ";authenticated", clientID,
                                                          3600000);
                     OAuthResponse response = OAuthASResponse.tokenResponse(HttpServletResponse.SC_OK)
                                                             .setAccessToken(jwt)
