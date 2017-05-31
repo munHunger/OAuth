@@ -15,16 +15,15 @@ import java.util.Date;
  */
 public class JSONWebToken
 {
-    public static String secret = "shhitisasecret"; //TODO: read this from settings file
-
-    public static String buildToken(String id, String issuer, String subject, long ttlMillis)
+    public static String buildToken(String jwtPass, String id, String issuer, String subject, String audience,
+                                    long ttlMillis)
     {
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
 
-        byte[] secretByteArray = DatatypeConverter.parseBase64Binary(secret);
+        byte[] secretByteArray = DatatypeConverter.parseBase64Binary(jwtPass);
         Key signingKey = new SecretKeySpec(secretByteArray, signatureAlgorithm.getJcaName());
 
         JwtBuilder builder = Jwts.builder()
@@ -32,6 +31,7 @@ public class JSONWebToken
                                  .setIssuedAt(now)
                                  .setSubject(subject)
                                  .setIssuer(issuer)
+                                 .setAudience(audience)
                                  .signWith(signatureAlgorithm, signingKey);
 
         if (ttlMillis >= 0)
@@ -44,10 +44,10 @@ public class JSONWebToken
         return builder.compact();
     }
 
-    public static Claims decryptToken(String jwt) throws Exception
+    public static Claims decryptToken(String jwtPass, String jwt) throws Exception
     {
         Claims claims = Jwts.parser()
-                            .setSigningKey(DatatypeConverter.parseBase64Binary(secret))
+                            .setSigningKey(DatatypeConverter.parseBase64Binary(jwtPass))
                             .parseClaimsJws(jwt)
                             .getBody();
         return claims;

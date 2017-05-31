@@ -29,4 +29,17 @@ public class ClientRequest
                       value = "A requested client ID. Note that it is unlikely that this ID will be the final registered ID. This can be seen as more of a suggestion. Max-length is 16 characters",
                       example = "24MSSO", required = true)
     public String clientID;
+
+    @XmlElement(name = "client_name")
+    @SerializedName("client_name")
+    @ApiModelProperty(name = "client_name", value = "A \"user-friendly\" name that identifies the client",
+                      example = "money transfer service", required = true)
+    public String clientName;
+
+    @XmlElement(name = "jwt_key")
+    @SerializedName("jwt_key")
+    @ApiModelProperty(name = "jwt_key",
+                      value = "The key to encrypt ID tokens(JWT) with. Note that this will be stored in plaintext in the database",
+                      example = "CorrectHorseBatteryStaple", required = true)
+    public String jwtKey;
 }

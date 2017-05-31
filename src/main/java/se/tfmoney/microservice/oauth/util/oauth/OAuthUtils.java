@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import org.apache.oltu.oauth2.common.message.types.ParameterStyle;
 import org.apache.oltu.oauth2.rs.request.OAuthAccessResourceRequest;
 import se.tfmoney.microservice.oauth.util.jwt.JSONWebToken;
+import se.tfmoney.microservice.oauth.util.properties.Settings;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
@@ -22,12 +23,14 @@ public class OAuthUtils
         Claims claims;
         try
         {
-            claims = JSONWebToken.decryptToken(accessToken);
+            claims = JSONWebToken.decryptToken(Settings.getStringSetting("jwt_key"), accessToken);
+            boolean correctAudience = Arrays.asList(claims.getAudience().split(";"))
+                                            .contains(Settings.getStringSetting("client_id"));
+            return correctAudience;
         } catch (Exception e)
         {
             return false;
         }
-        return true;
     }
 
     public static boolean isAuthenticated(HttpServletRequest request) throws Exception
@@ -45,8 +48,12 @@ public class OAuthUtils
         Claims claims;
         try
         {
-            claims = JSONWebToken.decryptToken(accessToken);
-            return Arrays.stream(claims.getSubject().split(";")).filter(role -> accepted.contains(role)).count() > 0;
+            claims = JSONWebToken.decryptToken(Settings.getStringSetting("jwt_key"), accessToken);
+            boolean correctAudience = Arrays.asList(claims.getAudience().split(";"))
+                                            .contains(Settings.getStringSetting("client_id"));
+            return correctAudience && Arrays.stream(claims.getSubject().split(";"))
+                                            .filter(role -> accepted.contains(role))
+                                            .count() > 0;
         } catch (Exception e)
         {
             return false;

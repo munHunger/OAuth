@@ -8,9 +8,11 @@ import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 import org.springframework.stereotype.Component;
 import se.tfmoney.microservice.oauth.model.AuthenticationToken;
+import se.tfmoney.microservice.oauth.model.client.RegisteredClient;
 import se.tfmoney.microservice.oauth.model.user.User;
 import se.tfmoney.microservice.oauth.util.database.jpa.Database;
 import se.tfmoney.microservice.oauth.util.jwt.JSONWebToken;
+import se.tfmoney.microservice.oauth.util.properties.Settings;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -66,8 +68,9 @@ public class TokenBean
             Map<String, Object> params = new HashMap<>();
             params.put("id", clientID);
             params.put("secret", org.apache.commons.codec.digest.DigestUtils.sha256Hex(clientSecret));
-            boolean validClientCredentials = !Database.getObjects(
-                    "from RegisteredClient WHERE clientID = :id AND clientSecret = :secret", params).isEmpty();
+            List registeredClient = Database.getObjects(
+                    "from RegisteredClient WHERE clientID = :id AND clientSecret = :secret", params);
+            boolean validClientCredentials = !registeredClient.isEmpty();
 
             DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             params = new HashMap<>();
@@ -76,6 +79,7 @@ public class TokenBean
             params.put("date", formatter.format(Calendar.getInstance().getTime()));
             if (validClientCredentials)
             {
+                RegisteredClient client = (RegisteredClient) registeredClient.get(0);
                 List token = Database.getObjects(
                         "from AuthenticationToken WHERE authToken = :token AND clientID = :clientID AND expirationDate > date(:date)",
                         params);
@@ -83,8 +87,10 @@ public class TokenBean
                 {
                     AuthenticationToken authToken = (AuthenticationToken) token.get(0);
                     String accessToken = authToken.accessToken;
-                    String jwt = JSONWebToken.buildToken(accessToken, clientID,
-                                                         new User(authToken.username, null).getRolesCSV(), 3600000);
+                    String jwt = JSONWebToken.buildToken(client.jwtKey, accessToken,
+                                                         Settings.getStringSetting("issuer_id"),
+                                                         new User(authToken.username, null).getRolesCSV(), clientID,
+                                                         3600000);
                     OAuthResponse response = OAuthASResponse.tokenResponse(HttpServletResponse.SC_OK)
                                                             .setAccessToken(jwt)
                                                             .buildJSONMessage();

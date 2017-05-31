@@ -9,16 +9,15 @@ import se.tfmoney.microservice.oauth.model.error.ErrorMessage;
 import se.tfmoney.microservice.oauth.util.database.jpa.Database;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Marcus Münger on 2017-05-16.
@@ -28,6 +27,26 @@ import java.util.List;
 @Component
 public class ClientBean
 {
+    @GET
+    @Path("/client/{id}")
+    @Produces(MediaType.TEXT_PLAIN)
+    @ApiOperation(value = "Translate clientID", notes = "Translates a clientID into its user-friendly name")
+    @ApiResponses(value = {@ApiResponse(code = HttpServletResponse.SC_OK,
+                                        message = "The user-friendly name attached to the client noted by the submitted clientID"), @ApiResponse(
+            code = HttpServletResponse.SC_NOT_FOUND, message = "Could not find the client noted by the clientID")})
+    public Response idToName(
+            @PathParam("id")
+                    String clientID) throws Exception
+    {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("id", clientID);
+        List client = Database.getObjects("from RegisteredClient WHERE clientID = :id", params);
+        if (client.isEmpty())
+            return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
+        else
+            return Response.ok(((RegisteredClient) client.get(0)).clientName).build();
+    }
+
     @POST
     @Path("/client")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -50,10 +69,14 @@ public class ClientBean
         client.clientSecret = new BigInteger(64 * 5, new SecureRandom()).toString(32);
         client.clientID = request.clientID + new BigInteger((32 - request.clientID.length()) * 5,
                                                             new SecureRandom()).toString(32);
+        client.clientName = request.clientName;
+        client.jwtKey = request.jwtKey;
 
         RegisteredClient dbSafeClient = new RegisteredClient();
         dbSafeClient.clientID = client.clientID;
         dbSafeClient.clientSecret = org.apache.commons.codec.digest.DigestUtils.sha256Hex(client.clientSecret);
+        dbSafeClient.clientName = request.clientName;
+        dbSafeClient.jwtKey = request.jwtKey;
         try
         {
             List<Object> objectsToSave = new ArrayList<>();

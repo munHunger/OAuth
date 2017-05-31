@@ -1,11 +1,13 @@
 DROP DATABASE `24mssomicro`;
-CREATE SCHEMA `24mssomicro` ;
+CREATE SCHEMA `24mssomicro`;
 
 CREATE TABLE `24mssomicro`.`client` (
   `client_id` VARCHAR(32) NOT NULL,
   `client_secret` VARCHAR(64) NOT NULL,
+  `client_name` VARCHAR(64) NOT NULL,
+  `jwt_key` VARCHAR(64) NOT NULL,
   PRIMARY KEY (`client_id`),
-  UNIQUE INDEX `client_secret_UNIQUE` (`client_secret` ASC),
+  UNIQUE INDEX `client_name_UNIQUE` (`client_name` ASC),
   UNIQUE INDEX `client_id_UNIQUE` (`client_id` ASC));
 
 CREATE TABLE `24mssomicro`.`client_url` (

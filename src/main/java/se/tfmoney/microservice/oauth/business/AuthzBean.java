@@ -15,6 +15,7 @@ import org.apache.oltu.oauth2.common.message.types.ResponseType;
 import org.apache.oltu.oauth2.common.utils.OAuthUtils;
 import org.springframework.stereotype.Component;
 import se.tfmoney.microservice.oauth.model.AuthenticationToken;
+import se.tfmoney.microservice.oauth.model.client.RegisteredClient;
 import se.tfmoney.microservice.oauth.model.user.User;
 import se.tfmoney.microservice.oauth.util.database.jpa.Database;
 import se.tfmoney.microservice.oauth.util.jwt.JSONWebToken;
@@ -32,6 +33,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -76,7 +78,8 @@ public class AuthzBean
             OAuthIssuerImpl oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
             Map<String, Object> param = new HashMap<>();
             param.put("id", oauthRequest.getParam(OAuth.OAUTH_CLIENT_ID));
-            boolean clientExist = !Database.getObjects("from RegisteredClient WHERE clientID = :id", param).isEmpty();
+            List clientList = Database.getObjects("from RegisteredClient WHERE clientID = :id", param);
+            boolean clientExist = !clientList.isEmpty();
 
             param = new HashMap<>();
             param.put("id", oauthRequest.getParam(OAuth.OAUTH_CLIENT_ID));
@@ -115,8 +118,11 @@ public class AuthzBean
                 else if (ResponseType.TOKEN.toString().equals(responseType) && "TRUE".equals(
                         Settings.getStringSetting("allow_implicit_grant").toUpperCase()))
                 {
-                    String jwt = JSONWebToken.buildToken(token.accessToken, oauthRequest.getClientId(),
-                                                         new User(username, null).getRolesCSV(), 3600000);
+                    RegisteredClient client = (RegisteredClient) clientList.get(0);
+                    String jwt = JSONWebToken.buildToken(client.jwtKey, token.accessToken,
+                                                         Settings.getStringSetting("issuer_id"),
+                                                         new User(username, null).getRolesCSV(), client.clientID,
+                                                         3600000);
                     builder.setAccessToken(jwt);
                 }
 
