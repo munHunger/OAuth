@@ -105,10 +105,11 @@ public class AuthzBean
                 AuthenticationToken token = new AuthenticationToken(authorizationCode, oauthIssuerImpl.accessToken(),
                                                                     oauthRequest.getParam(OAuth.OAUTH_CLIENT_ID),
                                                                     oauthRequest.getParam(OAuth.OAUTH_USERNAME),
-                                                                    formater.format(calendar.getTime()));
+                                                                    formater.format(calendar.getTime()),
+                                                                    oauthIssuerImpl.refreshToken());
 
-                invalidateTokens(oauthRequest.getParam(OAuth.OAUTH_CLIENT_ID),
-                                 oauthRequest.getParam(OAuth.OAUTH_USERNAME));
+                OAuthUtils.invalidateTokens(oauthRequest.getParam(OAuth.OAUTH_CLIENT_ID),
+                                            oauthRequest.getParam(OAuth.OAUTH_USERNAME));
 
                 Database.saveObject(token);
 
@@ -137,16 +138,6 @@ public class AuthzBean
         {
             return buildError(e);
         }
-    }
-
-    private void invalidateTokens(String clientID, String username) throws Exception
-    {
-        Map<String, Object> param = new HashMap<>();
-        param.put("client", clientID);
-        param.put("user", username);
-        for (Object o : Database.getObjects("from AuthenticationToken WHERE clientID = :client AND username = :user",
-                                            param))
-            Database.deleteObjects(o);
     }
 
     private Response buildError(OAuthProblemException e) throws OAuthSystemException, URISyntaxException

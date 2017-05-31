@@ -35,16 +35,20 @@ public class AuthenticationToken implements Serializable
     @Expose(serialize = false, deserialize = false)
     public String expirationDate;
 
+    @Column(name = "refresh_token")
+    public String refreshToken;
+
     public AuthenticationToken()
     {}
 
     public AuthenticationToken(String authToken, String accessToken, String clientID, String username,
-                               String expirationDate)
+                               String expirationDate, String refreshToken)
     {
         this.authToken = authToken;
         this.accessToken = accessToken;
         this.clientID = clientID;
         this.username = username;
         this.expirationDate = expirationDate;
+        this.refreshToken = refreshToken;
     }
 }

@@ -3,6 +3,8 @@ package se.tfmoney.microservice.oauth.business;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.oltu.oauth2.as.issuer.MD5Generator;
+import org.apache.oltu.oauth2.as.issuer.OAuthIssuerImpl;
 import org.apache.oltu.oauth2.as.response.OAuthASResponse;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
@@ -12,6 +14,7 @@ import se.tfmoney.microservice.oauth.model.client.RegisteredClient;
 import se.tfmoney.microservice.oauth.model.user.User;
 import se.tfmoney.microservice.oauth.util.database.jpa.Database;
 import se.tfmoney.microservice.oauth.util.jwt.JSONWebToken;
+import se.tfmoney.microservice.oauth.util.oauth.OAuthUtils;
 import se.tfmoney.microservice.oauth.util.properties.Settings;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,6 +43,76 @@ public class TokenBean
 {
     @Context
     private HttpServletRequest servletRequest;
+
+    @POST
+    @Path("/token/refresh")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Refresh access token", notes = "Uses a refresh token to update an access token")
+    public Response refresh(
+            @FormParam("client_id")
+                    String clientID,
+            @FormParam("client_secret")
+                    String clientSecret,
+            @FormParam("refresh_token")
+                    String refreshRoken) throws Exception
+    {
+        try
+        {
+            Map<String, Object> params = new HashMap<>();
+            params.put("id", clientID);
+            params.put("secret", org.apache.commons.codec.digest.DigestUtils.sha256Hex(clientSecret));
+            List registeredClient = Database.getObjects(
+                    "from RegisteredClient WHERE clientID = :id AND clientSecret = :secret", params);
+            boolean validClientCredentials = !registeredClient.isEmpty();
+
+            if (validClientCredentials)
+            {
+                RegisteredClient client = (RegisteredClient) registeredClient.get(0);
+                params = new HashMap<>();
+                params.put("token", refreshRoken);
+                List tokenList = Database.getObjects(
+                        "from AuthenticationToken WHERE refreshToken = :token AND clientID = :clientID", params);
+                if (!tokenList.isEmpty())
+                {
+                    AuthenticationToken authToken = (AuthenticationToken) tokenList.get(0);
+                    OAuthIssuerImpl oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
+                    final String authorizationCode = oauthIssuerImpl.authorizationCode();
+
+                    DateFormat formater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.add(Calendar.HOUR, 1);
+                    AuthenticationToken token = new AuthenticationToken(authorizationCode,
+                                                                        oauthIssuerImpl.accessToken(), clientID,
+                                                                        authToken.username,
+                                                                        formater.format(calendar.getTime()),
+                                                                        oauthIssuerImpl.refreshToken());
+
+                    OAuthUtils.invalidateTokens(clientID, authToken.username);
+
+                    Database.saveObject(token);
+
+                    String accessToken = authToken.accessToken;
+                    String jwt = JSONWebToken.buildToken(client.jwtKey, accessToken,
+                                                         Settings.getStringSetting("issuer_id"),
+                                                         new User(authToken.username,
+                                                                  null).getRolesCSV() + ";authenticated", clientID,
+                                                         3600000);
+                    OAuthResponse response = OAuthASResponse.tokenResponse(HttpServletResponse.SC_OK)
+                                                            .setAccessToken(jwt)
+                                                            .setRefreshToken(authToken.refreshToken)
+                                                            .buildJSONMessage();
+                    return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
+                }
+            }
+            return Response.status(HttpServletResponse.SC_UNAUTHORIZED).build();
+        } catch (OAuthProblemException e)
+        {
+            OAuthResponse res = OAuthASResponse.errorResponse(HttpServletResponse.SC_BAD_REQUEST)
+                                               .error(e)
+                                               .buildJSONMessage();
+            return Response.status(res.getResponseStatus()).entity(res.getBody()).build();
+        }
+    }
 
     @POST
     @Path("/token")
@@ -94,6 +167,7 @@ public class TokenBean
                                                          3600000);
                     OAuthResponse response = OAuthASResponse.tokenResponse(HttpServletResponse.SC_OK)
                                                             .setAccessToken(jwt)
+                                                            .setRefreshToken(authToken.refreshToken)
                                                             .buildJSONMessage();
                     return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
                 }
