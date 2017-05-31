@@ -36,6 +36,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static se.tfmoney.microservice.oauth.util.oauth.OAuthUtils.invalidateTokens;
+
 /**
  * Created by Marcus Münger on 2017-05-16.
  */
@@ -108,8 +110,8 @@ public class AuthzBean
                                                                     formater.format(calendar.getTime()),
                                                                     oauthIssuerImpl.refreshToken());
 
-                OAuthUtils.invalidateTokens(oauthRequest.getParam(OAuth.OAUTH_CLIENT_ID),
-                                            oauthRequest.getParam(OAuth.OAUTH_USERNAME));
+                invalidateTokens(oauthRequest.getParam(OAuth.OAUTH_CLIENT_ID),
+                                 oauthRequest.getParam(OAuth.OAUTH_USERNAME));
 
                 Database.saveObject(token);
 
@@ -122,8 +124,8 @@ public class AuthzBean
                     RegisteredClient client = (RegisteredClient) clientList.get(0);
                     String jwt = JSONWebToken.buildToken(client.jwtKey, token.accessToken,
                                                          Settings.getStringSetting("issuer_id"),
-                                                         new User(username, null).getRolesCSV(), client.clientID,
-                                                         3600000);
+                                                         new User(username, null).getRolesCSV() + ";implicit",
+                                                         client.clientID, 3600000);
                     builder.setAccessToken(jwt);
                 }
 

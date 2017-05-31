@@ -35,6 +35,7 @@ CREATE TABLE `24mssomicro`.`roles` (
 CREATE TABLE `24mssomicro`.`authentication_token` (
   `auth_token` VARCHAR(64) NOT NULL,
   `access_token` VARCHAR(64) NOT NULL,
+  `refresh_token` VARCHAR(64) NOT NULL,
   `client_id` VARCHAR(32) NOT NULL,
   `username` VARCHAR(256) NOT NULL,
   `expiration_date` DATETIME NOT NULL,
