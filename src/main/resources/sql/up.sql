@@ -41,3 +41,9 @@ CREATE TABLE `24mssomicro`.`authentication_token` (
   `expiration_date` DATETIME NOT NULL,
   PRIMARY KEY (`auth_token`, `access_token`),
   UNIQUE INDEX `auth_token_UNIQUE` (`auth_token` ASC));
+
+CREATE TABLE `24mssomicro`.`nonce` (
+  `token` VARCHAR(32) NOT NULL,
+  `expiration_date` DATETIME NOT NULL,
+  PRIMARY KEY (`token`),
+  UNIQUE INDEX `token_UNIQUE` (`token` ASC));
