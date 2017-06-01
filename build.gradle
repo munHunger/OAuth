@@ -73,5 +73,5 @@ dependencies {
 }
 
 war {
-    destinationDir(file('build/ '))
+    destinationDir(file('build/'))
 }
