@@ -52,4 +52,23 @@ public class JSONWebToken
                             .getBody();
         return claims;
     }
+
+    public static String reencryptToken(String oldJWTPass, String newJWTPass, String jwt) throws Exception
+    {
+        Claims claims = decryptToken(oldJWTPass, jwt);
+
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
+        byte[] secretByteArray = DatatypeConverter.parseBase64Binary(newJWTPass);
+        Key signingKey = new SecretKeySpec(secretByteArray, signatureAlgorithm.getJcaName());
+
+        JwtBuilder builder = Jwts.builder()
+                                 .setId(claims.getId())
+                                 .setIssuedAt(claims.getIssuedAt())
+                                 .setSubject(claims.getSubject())
+                                 .setIssuer(claims.getIssuer())
+                                 .setAudience(claims.getAudience())
+                                 .setExpiration(claims.getExpiration())
+                                 .signWith(signatureAlgorithm, signingKey);
+        return builder.compact();
+    }
 }
