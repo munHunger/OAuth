@@ -1,0 +1,33 @@
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+    <session-factory name="localConnection">
+        <property name="hibernate.dialect">
+            org.hibernate.dialect.MySQLDialect
+        </property>
+        <property name="hibernate.connection.driver_class">
+            com.mysql.jdbc.Driver
+        </property>
+
+        <!-- Assume test is the database name -->
+        <property
+                name="hibernate.connection.url">
+            jdbc:mysql://localhost:3306/24mssomicro?useSSL=false
+        </property>
+        <property name="hibernate.connection.username">
+            mamu
+        </property>
+        <property name="hibernate.connection.password">
+            ?HWU7\1?vRVMEEQCl&tY
+        </property>
+
+        <!-- List of XML mapping files -->
+        <mapping class="se.tfmoney.microservice.oauth.model.client.RegisteredClient"/>
+        <mapping class="se.tfmoney.microservice.oauth.model.client.ClientURL"/>
+        <mapping class="se.tfmoney.microservice.oauth.model.user.User"/>
+        <mapping class="se.tfmoney.microservice.oauth.model.user.UserRoles"/>
+        <mapping class="se.tfmoney.microservice.oauth.model.AuthenticationToken"/>
+    </session-factory>
+</hibernate-configuration>
