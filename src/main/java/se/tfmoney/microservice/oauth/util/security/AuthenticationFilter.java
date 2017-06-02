@@ -96,6 +96,7 @@ public class AuthenticationFilter implements ContainerRequestFilter
                         authzHeader = OAuthUtils.convertToAccessToken(authzHeader).accessToken;
                     } catch (Exception e)
                     {
+                        e.printStackTrace();
                         requestContext.abortWith(Response.status(HttpServletResponse.SC_UNAUTHORIZED)
                                                          .entity(new ErrorMessage("Error getting access code",
                                                                                   "Could not convert authentication token into an access token"))

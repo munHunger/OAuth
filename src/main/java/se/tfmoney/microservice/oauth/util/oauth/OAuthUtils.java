@@ -26,13 +26,14 @@ public class OAuthUtils
                 "nonce");
         Map<String, String> headers = new HashMap<>();
         headers.put("nonce", nonce);
-        StringBuilder urlBuilder = new StringBuilder(Settings.getStringSetting("issuer_url")).append("/oauth/token");
-        urlBuilder.append("?grant_type=authorization_code");
-        urlBuilder.append("&client_id=").append(Settings.getStringSetting("client_id"));
-        urlBuilder.append("&client_secret=").append(Settings.getStringSetting("client_secret"));
-        urlBuilder.append("&code=").append(authToken);
-        return (AccessToken) HttpRequest.postRequest(urlBuilder.toString(), headers, new HashMap<>(), "",
-                                                     AccessToken.class).data;
+        Map<String, String> param = new HashMap<>();
+        param.put("grant_type", "authorization_code");
+        param.put("client_id", Settings.getStringSetting("client_id"));
+        param.put("client_secret", Settings.getStringSetting("client_secret"));
+        param.put("code", authToken);
+
+        return (AccessToken) HttpRequest.postForm(Settings.getStringSetting("issuer_url") + "/oauth/token", headers,
+                                                  param, AccessToken.class).data;
     }
 
     public static boolean isAuthenticated(String accessToken) throws Exception
