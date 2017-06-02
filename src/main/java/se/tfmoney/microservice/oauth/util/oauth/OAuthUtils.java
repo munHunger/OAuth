@@ -46,6 +46,8 @@ public class OAuthUtils
 
     public static boolean hasAnyRole(String accessToken, String... acceptedRoles) throws Exception
     {
+        if (accessToken == null)
+            return false;
         if (accessToken.toUpperCase().startsWith("BEARER "))
             accessToken = accessToken.substring("BEARER ".length());
         List<String> accepted = Arrays.asList(acceptedRoles);
