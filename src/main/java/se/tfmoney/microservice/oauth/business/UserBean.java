@@ -4,6 +4,7 @@ import io.swagger.annotations.*;
 import org.springframework.stereotype.Component;
 import se.tfmoney.microservice.oauth.model.token.NonceToken;
 import se.tfmoney.microservice.oauth.model.user.UserRoles;
+import se.tfmoney.microservice.oauth.util.annotations.NonceRequired;
 import se.tfmoney.microservice.oauth.util.database.jpa.Database;
 
 import javax.servlet.http.HttpServletResponse;
@@ -25,6 +26,7 @@ public class UserBean
 {
     @POST
     @Path("/user")
+    @NonceRequired
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Create a new user",
                   notes = "Creates a new user at the current OAuth service. All registered clients can create a new user")
