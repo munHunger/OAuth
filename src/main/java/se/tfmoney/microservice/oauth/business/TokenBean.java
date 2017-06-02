@@ -9,9 +9,9 @@ import org.apache.oltu.oauth2.as.response.OAuthASResponse;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 import org.springframework.stereotype.Component;
-import se.tfmoney.microservice.oauth.model.AuthenticationToken;
-import se.tfmoney.microservice.oauth.model.NonceToken;
 import se.tfmoney.microservice.oauth.model.client.RegisteredClient;
+import se.tfmoney.microservice.oauth.model.token.AuthenticationToken;
+import se.tfmoney.microservice.oauth.model.token.NonceToken;
 import se.tfmoney.microservice.oauth.model.user.User;
 import se.tfmoney.microservice.oauth.util.database.jpa.Database;
 import se.tfmoney.microservice.oauth.util.jwt.JSONWebToken;
@@ -126,7 +126,7 @@ public class TokenBean
     @Path("/token")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Converts an authentication token to an access token",
-                  notes = "A login endpoint for client to convert a users authentication token into an access token. After authentication the user will be redirected to the specified URI with the url-pattern: {redirect_uri}#access_token={access_token}&expires_in={time}")
+                  notes = "A login endpoint for client to convert a users authentication token into an access token. A refresh token will be included in case a refresh is needed")
     public Response authorize(
             @HeaderParam("nonce")
                     String nonce,

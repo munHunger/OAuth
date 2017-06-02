@@ -1,6 +1,6 @@
 package se.tfmoney.microservice.oauth.util.nonce;
 
-import se.tfmoney.microservice.oauth.model.NonceToken;
+import se.tfmoney.microservice.oauth.model.token.NonceToken;
 import se.tfmoney.microservice.oauth.util.database.jpa.Database;
 
 import java.text.DateFormat;

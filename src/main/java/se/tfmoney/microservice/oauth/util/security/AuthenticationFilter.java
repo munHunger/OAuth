@@ -1,8 +1,9 @@
 package se.tfmoney.microservice.oauth.util.security;
 
-import se.tfmoney.microservice.oauth.model.NonceToken;
 import se.tfmoney.microservice.oauth.model.error.ErrorMessage;
+import se.tfmoney.microservice.oauth.model.token.NonceToken;
 import se.tfmoney.microservice.oauth.util.annotations.NonceRequired;
+import se.tfmoney.microservice.oauth.util.jwt.JSONWebToken;
 import se.tfmoney.microservice.oauth.util.nonce.NonceUtils;
 import se.tfmoney.microservice.oauth.util.oauth.OAuthUtils;
 
@@ -88,6 +89,21 @@ public class AuthenticationFilter implements ContainerRequestFilter
                 String authzHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
                 authzHeader = authzHeader == null || authzHeader.length() < "Bearer ".length() ? null : authzHeader.substring(
                         "Bearer ".length());
+                if (!JSONWebToken.isSigned(authzHeader))
+                {
+                    try
+                    {
+                        authzHeader = OAuthUtils.convertToAccessToken(authzHeader).accessToken;
+                    } catch (Exception e)
+                    {
+                        requestContext.abortWith(Response.status(HttpServletResponse.SC_UNAUTHORIZED)
+                                                         .entity(new ErrorMessage("Error getting access code",
+                                                                                  "Could not convert authentication token into an access token"))
+                                                         .header("nonce", nonceToken)
+                                                         .build());
+                        return;
+                    }
+                }
                 try
                 {
                     if (OAuthUtils.isAuthenticated(authzHeader))

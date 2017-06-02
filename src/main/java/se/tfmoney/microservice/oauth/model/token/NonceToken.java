@@ -1,4 +1,4 @@
-package se.tfmoney.microservice.oauth.model;
+package se.tfmoney.microservice.oauth.model.token;
 
 import se.tfmoney.microservice.oauth.util.database.jpa.Database;
 import se.tfmoney.microservice.oauth.util.nonce.NonceUtils;

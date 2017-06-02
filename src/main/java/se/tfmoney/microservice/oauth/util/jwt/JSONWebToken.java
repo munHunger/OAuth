@@ -15,6 +15,11 @@ import java.util.Date;
  */
 public class JSONWebToken
 {
+    public static boolean isSigned(String jwt)
+    {
+        return Jwts.parser().isSigned(jwt);
+    }
+
     public static String buildToken(String jwtPass, String id, String issuer, String subject, String audience,
                                     long ttlMillis)
     {

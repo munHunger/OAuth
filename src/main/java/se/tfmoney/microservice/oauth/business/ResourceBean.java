@@ -3,7 +3,7 @@ package se.tfmoney.microservice.oauth.business;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.stereotype.Component;
-import se.tfmoney.microservice.oauth.model.NonceToken;
+import se.tfmoney.microservice.oauth.model.token.NonceToken;
 import se.tfmoney.microservice.oauth.util.annotations.NonceRequired;
 
 import javax.annotation.security.DenyAll;

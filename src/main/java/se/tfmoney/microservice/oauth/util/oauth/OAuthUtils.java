@@ -3,7 +3,9 @@ package se.tfmoney.microservice.oauth.util.oauth;
 import io.jsonwebtoken.Claims;
 import org.apache.oltu.oauth2.common.message.types.ParameterStyle;
 import org.apache.oltu.oauth2.rs.request.OAuthAccessResourceRequest;
+import se.tfmoney.microservice.oauth.model.token.AccessToken;
 import se.tfmoney.microservice.oauth.util.database.jpa.Database;
+import se.tfmoney.microservice.oauth.util.http.HttpRequest;
 import se.tfmoney.microservice.oauth.util.jwt.JSONWebToken;
 import se.tfmoney.microservice.oauth.util.properties.Settings;
 
@@ -18,11 +20,25 @@ import java.util.Map;
  */
 public class OAuthUtils
 {
+    public static AccessToken convertToAccessToken(String authToken) throws Exception
+    {
+        String nonce = HttpRequest.getRequest(Settings.getStringSetting("issuer_url") + "/nonce", null).headers.get(
+                "nonce");
+        Map<String, String> headers = new HashMap<>();
+        headers.put("nonce", nonce);
+        StringBuilder urlBuilder = new StringBuilder(Settings.getStringSetting("issuer_url")).append("/oauth/token");
+        urlBuilder.append("?grant_type=authorization_code");
+        urlBuilder.append("&client_id=").append(Settings.getStringSetting("client_id"));
+        urlBuilder.append("&client_secret=").append(Settings.getStringSetting("client_secret"));
+        urlBuilder.append("&code=").append(authToken);
+        return (AccessToken) HttpRequest.postRequest(urlBuilder.toString(), headers, new HashMap<>(), "",
+                                                     AccessToken.class).data;
+    }
+
     public static boolean isAuthenticated(String accessToken) throws Exception
     {
         if (accessToken.toUpperCase().startsWith("BEARER "))
             accessToken = accessToken.substring("BEARER ".length());
-
         Claims claims;
         try
         {

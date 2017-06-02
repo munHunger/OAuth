@@ -4,7 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import org.springframework.stereotype.Component;
-import se.tfmoney.microservice.oauth.model.NonceToken;
+import se.tfmoney.microservice.oauth.model.token.NonceToken;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;

@@ -1,4 +1,4 @@
-package se.tfmoney.microservice.oauth.model;
+package se.tfmoney.microservice.oauth.model.token;
 
 import com.google.gson.annotations.Expose;
 

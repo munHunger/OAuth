@@ -2,7 +2,7 @@ package se.tfmoney.microservice.oauth.business;
 
 import io.swagger.annotations.*;
 import org.springframework.stereotype.Component;
-import se.tfmoney.microservice.oauth.model.NonceToken;
+import se.tfmoney.microservice.oauth.model.token.NonceToken;
 import se.tfmoney.microservice.oauth.model.user.UserRoles;
 import se.tfmoney.microservice.oauth.util.database.jpa.Database;
 
