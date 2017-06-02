@@ -43,7 +43,6 @@ dependencies {
     compile('io.swagger:swagger-jersey-jaxrs:1.5.13') {
         exclude group: 'javax.ws.rs'
     }
-    compile group: 'io.swagger', name: 'swagger-jersey-jaxrs', version: '1.5.13'
     compile group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.0-b05'
     compile group: 'org.springframework', name: 'spring-core', version: '4.3.8.RELEASE'
     compile group: 'org.springframework', name: 'spring-web', version: '4.3.8.RELEASE'
