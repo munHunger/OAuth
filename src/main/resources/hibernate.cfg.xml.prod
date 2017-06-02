@@ -20,7 +20,7 @@
             mamu
         </property>
         <property name="hibernate.connection.password">
-            ?HWU7\1?vRVMEEQCl&tY
+            ?HWU7\1?vRVMEEQCl&amp;tY
         </property>
 
         <!-- List of XML mapping files -->
