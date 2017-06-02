@@ -2,6 +2,7 @@ package se.tfmoney.microservice.oauth.business;
 
 import io.swagger.annotations.*;
 import org.springframework.stereotype.Component;
+import se.tfmoney.microservice.oauth.model.NonceToken;
 import se.tfmoney.microservice.oauth.model.client.ClientRequest;
 import se.tfmoney.microservice.oauth.model.client.ClientURL;
 import se.tfmoney.microservice.oauth.model.client.RegisteredClient;
@@ -35,6 +36,8 @@ public class ClientBean
                                         message = "The user-friendly name attached to the client noted by the submitted clientID"), @ApiResponse(
             code = HttpServletResponse.SC_NOT_FOUND, message = "Could not find the client noted by the clientID")})
     public Response idToName(
+            @HeaderParam("nonce")
+                    String nonce,
             @PathParam("id")
                     String clientID) throws Exception
     {
@@ -42,9 +45,13 @@ public class ClientBean
         params.put("id", clientID);
         List client = Database.getObjects("from RegisteredClient WHERE clientID = :id", params);
         if (client.isEmpty())
-            return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
+            return Response.status(HttpServletResponse.SC_NOT_FOUND)
+                           .header("nonce", NonceToken.generateToken().token)
+                           .build();
         else
-            return Response.ok(((RegisteredClient) client.get(0)).clientName).build();
+            return Response.ok(((RegisteredClient) client.get(0)).clientName)
+                           .header("nonce", NonceToken.generateToken().token)
+                           .build();
     }
 
     @POST
@@ -58,12 +65,15 @@ public class ClientBean
             code = HttpServletResponse.SC_BAD_REQUEST, message = "Could not create the client",
             response = ErrorMessage.class)})
     public Response createClient(
+            @HeaderParam("nonce")
+                    String nonce,
             @ApiParam(value = "The request for a new client", required = true)
                     ClientRequest request) throws Exception
     {
         if (request.clientID.length() > 16)
             return Response.status(HttpServletResponse.SC_BAD_REQUEST)
                            .entity(new ErrorMessage("Could not create client", "ClientID was too long"))
+                           .header("nonce", NonceToken.generateToken())
                            .build();
         RegisteredClient client = new RegisteredClient();
         client.clientSecret = new BigInteger(64 * 5, new SecureRandom()).toString(32);
@@ -91,8 +101,9 @@ public class ClientBean
             return Response.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
                            .entity(new ErrorMessage("Could not create client",
                                                     "Could not save the object in the database"))
+                           .header("nonce", NonceToken.generateToken().token)
                            .build();
         }
-        return Response.ok(client).build();
+        return Response.ok(client).header("nonce", NonceToken.generateToken().token).build();
     }
 }

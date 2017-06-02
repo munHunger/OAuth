@@ -2,14 +2,12 @@ package se.tfmoney.microservice.oauth.business;
 
 import io.swagger.annotations.*;
 import org.springframework.stereotype.Component;
+import se.tfmoney.microservice.oauth.model.NonceToken;
 import se.tfmoney.microservice.oauth.model.user.UserRoles;
 import se.tfmoney.microservice.oauth.util.database.jpa.Database;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -34,6 +32,8 @@ public class UserBean
             value = {@ApiResponse(code = HttpServletResponse.SC_NO_CONTENT, message = "User was created"), @ApiResponse(
                     code = HttpServletResponse.SC_CONFLICT, message = "User already exists")})
     public Response createUser(
+            @HeaderParam("nonce")
+                    String nonce,
             @ApiParam(
                     value = "The identification of the new user. Note that there are not restrictions on minimum length",
                     required = true, defaultValue = "dudeMaster43")
@@ -66,9 +66,13 @@ public class UserBean
             objects.add(newUser);
             objects.add(new UserRoles(newUser.username, "USER"));
             Database.saveObjects(objects);
-            return Response.status(HttpServletResponse.SC_NO_CONTENT).build();
+            return Response.status(HttpServletResponse.SC_NO_CONTENT)
+                           .header("nonce", NonceToken.generateToken().token)
+                           .build();
         }
         else
-            return Response.status(HttpServletResponse.SC_CONFLICT).build();
+            return Response.status(HttpServletResponse.SC_CONFLICT)
+                           .header("nonce", NonceToken.generateToken().token)
+                           .build();
     }
 }

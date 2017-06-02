@@ -9,12 +9,12 @@ import org.apache.oltu.oauth2.as.request.OAuthAuthzRequest;
 import org.apache.oltu.oauth2.as.response.OAuthASResponse;
 import org.apache.oltu.oauth2.common.OAuth;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
-import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 import org.apache.oltu.oauth2.common.message.types.ResponseType;
 import org.apache.oltu.oauth2.common.utils.OAuthUtils;
 import org.springframework.stereotype.Component;
 import se.tfmoney.microservice.oauth.model.AuthenticationToken;
+import se.tfmoney.microservice.oauth.model.NonceToken;
 import se.tfmoney.microservice.oauth.model.client.RegisteredClient;
 import se.tfmoney.microservice.oauth.model.user.User;
 import se.tfmoney.microservice.oauth.util.database.jpa.Database;
@@ -28,7 +28,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -55,6 +54,8 @@ public class AuthzBean
     @ApiOperation(value = "Authenticates a user",
                   notes = "Authenticates a user and returns either an access token or an authentication token depending on what is requested and what the client allows. If authenticated the user will be redirected to the redirect_uri with the url-pattern: {redirect_uri}(#access_token={access_token}&expires_in={time})|(?code={auth_token})")
     public Response authenticateRequest(
+            @HeaderParam("nonce")
+                    String nonce,
             @ApiParam(value = "The username of the user to authenticate", example = "DudeMaster43")
             @QueryParam("username")
                     String username,
@@ -132,19 +133,25 @@ public class AuthzBean
                 String redirectURI = oauthRequest.getParam(OAuth.OAUTH_REDIRECT_URI);
                 final OAuthResponse response = builder.location(redirectURI).buildQueryMessage();
                 URI url = new URI(response.getLocationUri());
-                return Response.status(response.getResponseStatus()).location(url).build();
+                return Response.status(response.getResponseStatus())
+                               .header("nonce", NonceToken.generateToken().token)
+                               .location(url)
+                               .build();
             }
             else
-                return Response.status(HttpServletResponse.SC_UNAUTHORIZED).build();
+                return Response.status(HttpServletResponse.SC_UNAUTHORIZED)
+                               .header("nonce", NonceToken.generateToken().token)
+                               .build();
         } catch (OAuthProblemException e)
         {
             return buildError(e);
         }
     }
 
-    private Response buildError(OAuthProblemException e) throws OAuthSystemException, URISyntaxException
+    private Response buildError(OAuthProblemException e) throws Exception
     {
-        final Response.ResponseBuilder responseBuilder = Response.status(HttpServletResponse.SC_FOUND);
+        final Response.ResponseBuilder responseBuilder = Response.status(HttpServletResponse.SC_FOUND)
+                                                                 .header("nonce", NonceToken.generateToken().token);
         String redirectUri = e.getRedirectUri();
 
         if (OAuthUtils.isEmpty(redirectUri))

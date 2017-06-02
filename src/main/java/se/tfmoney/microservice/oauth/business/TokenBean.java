@@ -10,6 +10,7 @@ import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 import org.springframework.stereotype.Component;
 import se.tfmoney.microservice.oauth.model.AuthenticationToken;
+import se.tfmoney.microservice.oauth.model.NonceToken;
 import se.tfmoney.microservice.oauth.model.client.RegisteredClient;
 import se.tfmoney.microservice.oauth.model.user.User;
 import se.tfmoney.microservice.oauth.util.database.jpa.Database;
@@ -19,10 +20,7 @@ import se.tfmoney.microservice.oauth.util.properties.Settings;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -49,6 +47,8 @@ public class TokenBean
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Refresh access token", notes = "Uses a refresh token to update an access token")
     public Response refresh(
+            @HeaderParam("nonce")
+                    String nonce,
             @FormParam("client_id")
                     String clientID,
             @FormParam("client_secret")
@@ -101,16 +101,24 @@ public class TokenBean
                                                             .setAccessToken(jwt)
                                                             .setRefreshToken(authToken.refreshToken)
                                                             .buildJSONMessage();
-                    return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
+                    return Response.status(response.getResponseStatus())
+                                   .entity(response.getBody())
+                                   .header("nonce", NonceToken.generateToken().token)
+                                   .build();
                 }
             }
-            return Response.status(HttpServletResponse.SC_UNAUTHORIZED).build();
+            return Response.status(HttpServletResponse.SC_UNAUTHORIZED)
+                           .header("nonce", NonceToken.generateToken().token)
+                           .build();
         } catch (OAuthProblemException e)
         {
             OAuthResponse res = OAuthASResponse.errorResponse(HttpServletResponse.SC_BAD_REQUEST)
                                                .error(e)
                                                .buildJSONMessage();
-            return Response.status(res.getResponseStatus()).entity(res.getBody()).build();
+            return Response.status(res.getResponseStatus())
+                           .entity(res.getBody())
+                           .header("nonce", NonceToken.generateToken().token)
+                           .build();
         }
     }
 
@@ -120,6 +128,8 @@ public class TokenBean
     @ApiOperation(value = "Converts an authentication token to an access token",
                   notes = "A login endpoint for client to convert a users authentication token into an access token. After authentication the user will be redirected to the specified URI with the url-pattern: {redirect_uri}#access_token={access_token}&expires_in={time}")
     public Response authorize(
+            @HeaderParam("nonce")
+                    String nonce,
             @ApiParam(value = "Authentication type", allowableValues = "authorization_code")
             @FormParam("grant_type")
                     String queryParam,
@@ -169,16 +179,24 @@ public class TokenBean
                                                             .setAccessToken(jwt)
                                                             .setRefreshToken(authToken.refreshToken)
                                                             .buildJSONMessage();
-                    return Response.status(response.getResponseStatus()).entity(response.getBody()).build();
+                    return Response.status(response.getResponseStatus())
+                                   .entity(response.getBody())
+                                   .header("nonce", NonceToken.generateToken().token)
+                                   .build();
                 }
             }
-            return Response.status(HttpServletResponse.SC_UNAUTHORIZED).build();
+            return Response.status(HttpServletResponse.SC_UNAUTHORIZED)
+                           .header("nonce", NonceToken.generateToken().token)
+                           .build();
         } catch (OAuthProblemException e)
         {
             OAuthResponse res = OAuthASResponse.errorResponse(HttpServletResponse.SC_BAD_REQUEST)
                                                .error(e)
                                                .buildJSONMessage();
-            return Response.status(res.getResponseStatus()).entity(res.getBody()).build();
+            return Response.status(res.getResponseStatus())
+                           .entity(res.getBody())
+                           .header("nonce", NonceToken.generateToken().token)
+                           .build();
         }
     }
 }
