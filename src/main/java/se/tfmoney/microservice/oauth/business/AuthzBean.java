@@ -5,9 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.oltu.oauth2.as.issuer.MD5Generator;
 import org.apache.oltu.oauth2.as.issuer.OAuthIssuerImpl;
-import org.apache.oltu.oauth2.as.request.OAuthAuthzRequest;
 import org.apache.oltu.oauth2.as.response.OAuthASResponse;
-import org.apache.oltu.oauth2.common.OAuth;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
 import org.apache.oltu.oauth2.common.message.types.ResponseType;
@@ -77,23 +75,21 @@ public class AuthzBean
     {
         try
         {
-            OAuthAuthzRequest oauthRequest = new OAuthAuthzRequest(servletRequest);
             OAuthIssuerImpl oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
             Map<String, Object> param = new HashMap<>();
-            param.put("id", oauthRequest.getParam(OAuth.OAUTH_CLIENT_ID));
+            param.put("id", clientID);
             List clientList = Database.getObjects("from RegisteredClient WHERE clientID = :id", param);
             boolean clientExist = !clientList.isEmpty();
 
             param = new HashMap<>();
-            param.put("id", oauthRequest.getParam(OAuth.OAUTH_CLIENT_ID));
-            param.put("url", oauthRequest.getParam(OAuth.OAUTH_REDIRECT_URI));
+            param.put("id", clientID);
+            param.put("url", redirectUri);
             boolean isUrlAuthorized = !Database.getObjects("from ClientURL WHERE clientID = :id AND url = :url", param)
                                                .isEmpty();
 
             param = new HashMap<>();
-            param.put("username", oauthRequest.getParam(OAuth.OAUTH_USERNAME));
-            param.put("password", org.apache.commons.codec.digest.DigestUtils.sha256Hex(
-                    oauthRequest.getParam(OAuth.OAUTH_PASSWORD)));
+            param.put("username", username);
+            param.put("password", org.apache.commons.codec.digest.DigestUtils.sha256Hex(password));
             boolean isUserAuthenticated = !Database.getObjects(
                     "from User WHERE username = :username AND password = :password", param).isEmpty();
             if (isUserAuthenticated && clientExist && isUrlAuthorized)
@@ -106,17 +102,15 @@ public class AuthzBean
                 Calendar calendar = Calendar.getInstance();
                 calendar.add(Calendar.HOUR, 1);
                 AuthenticationToken token = new AuthenticationToken(authorizationCode, oauthIssuerImpl.accessToken(),
-                                                                    oauthRequest.getParam(OAuth.OAUTH_CLIENT_ID),
-                                                                    oauthRequest.getParam(OAuth.OAUTH_USERNAME),
+                                                                    clientID, username,
                                                                     formater.format(calendar.getTime()),
                                                                     oauthIssuerImpl.refreshToken());
 
-                invalidateTokens(oauthRequest.getParam(OAuth.OAUTH_CLIENT_ID),
-                                 oauthRequest.getParam(OAuth.OAUTH_USERNAME));
+                invalidateTokens(clientID, username);
 
                 Database.saveObject(token);
 
-                String responseType = oauthRequest.getParam(OAuth.OAUTH_RESPONSE_TYPE);
+                String responseType = type;
                 if (ResponseType.CODE.toString().equals(responseType))
                     builder.setCode(authorizationCode);
                 else if (ResponseType.TOKEN.toString().equals(responseType) && "TRUE".equals(
@@ -130,7 +124,7 @@ public class AuthzBean
                     builder.setAccessToken(jwt);
                 }
 
-                String redirectURI = oauthRequest.getParam(OAuth.OAUTH_REDIRECT_URI);
+                String redirectURI = redirectUri;
                 final OAuthResponse response = builder.location(redirectURI).buildQueryMessage();
                 URI url = new URI(response.getLocationUri());
                 return Response.status(response.getResponseStatus())
