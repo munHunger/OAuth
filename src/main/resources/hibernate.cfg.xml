@@ -14,7 +14,7 @@
         <!-- Assume test is the database name -->
         <property
                 name="hibernate.connection.url">
-            jdbc:mysql://localhost:3306/24mssomicro?useSSL=false
+            jdbc:mysql://localhost:3306/wunderbaren?useSSL=false
         </property>
         <property name="hibernate.connection.username">
             root
@@ -24,11 +24,11 @@
         </property>
 
         <!-- List of XML mapping files -->
-        <mapping class="se.tfmoney.microservice.oauth.model.client.RegisteredClient"/>
-        <mapping class="se.tfmoney.microservice.oauth.model.client.ClientURL"/>
-        <mapping class="se.tfmoney.microservice.oauth.model.user.User"/>
-        <mapping class="se.tfmoney.microservice.oauth.model.user.UserRoles"/>
-        <mapping class="se.tfmoney.microservice.oauth.model.token.AuthenticationToken"/>
-        <mapping class="se.tfmoney.microservice.oauth.model.token.NonceToken"/>
+        <mapping class="se.munhunger.oauth.model.client.RegisteredClient"/>
+        <mapping class="se.munhunger.oauth.model.client.ClientURL"/>
+        <mapping class="se.munhunger.oauth.model.user.User"/>
+        <mapping class="se.munhunger.oauth.model.user.UserRoles"/>
+        <mapping class="se.munhunger.oauth.model.token.AuthenticationToken"/>
+        <mapping class="se.munhunger.oauth.model.token.NonceToken"/>
     </session-factory>
 </hibernate-configuration>

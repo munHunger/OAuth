@@ -1,4 +1,4 @@
-group 'se.tfmoney.microservice'
+group 'se.munhunger'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
@@ -15,7 +15,7 @@ repositories {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId 'se.tfmoney.microservice'
+            groupId 'se.munhunger'
             artifactId 'oauth'
             version '1.0-SNAPSHOT'
 

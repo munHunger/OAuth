@@ -6,7 +6,7 @@
 
 
     <!-- Application Beans -->
-    <context:component-scan base-package="se.tfmoney.microservice.oauth"/>
+    <context:component-scan base-package="se.munhunger.oauth"/>
 
     <!-- Swagger Beans -->
     <bean id="apiListingResource" class="io.swagger.jaxrs.listing.ApiListingResource"/>
@@ -16,18 +16,18 @@
     <bean id="oauthBeanConfig" class="io.swagger.jaxrs.config.BeanConfig">
         <property name="schemes" value="http"/>
         <property name="filterClass"
-                  value="se.tfmoney.microservice.oauth.util.swagger.ApiAuthorizationFilterImpl"/>
-        <property name="resourcePackage" value="se.tfmoney.microservice.oauth"/>
+                  value="se.munhunger.oauth.util.swagger.ApiAuthorizationFilterImpl"/>
+        <property name="resourcePackage" value="se.munhunger.oauth"/>
         <property name="version" value="0.0.1"/>
         <property name="host" value=""/>
         <property name="basePath" value="/api"/>
-        <property name="title" value="24Money OAuth implementation"/>
+        <property name="title" value="Munhunger OAuth implementation"/>
         <property name="description" value="A OAuth implementation to be linked with other APIs"/>
-        <property name="contact" value="marcus.munger@24money.se"/>
+        <property name="contact" value="marcusmunger@hotmail.se"/>
         <property name="scan" value="true"/>
     </bean>
 
     <!-- API Origin Filter -->
-    <bean id="apiOriginFilter" class="se.tfmoney.microservice.oauth.util.swagger.ApiOriginFilter"/>
+    <bean id="apiOriginFilter" class="se.munhunger.oauth.util.swagger.ApiOriginFilter"/>
 
 </beans>

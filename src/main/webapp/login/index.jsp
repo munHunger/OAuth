@@ -1,4 +1,4 @@
-<%@ page import="se.tfmoney.microservice.oauth.business.ClientBean" %><%--
+<%@ page import="se.munhunger.oauth.business.ClientBean" %><%--
   Created by IntelliJ IDEA.
   User: Marcus Münger
   Date: 2017-05-17

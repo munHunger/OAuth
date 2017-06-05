@@ -24,11 +24,11 @@
         </property>
 
         <!-- List of XML mapping files -->
-        <mapping class="se.tfmoney.microservice.oauth.model.client.RegisteredClient"/>
-        <mapping class="se.tfmoney.microservice.oauth.model.client.ClientURL"/>
-        <mapping class="se.tfmoney.microservice.oauth.model.user.User"/>
-        <mapping class="se.tfmoney.microservice.oauth.model.user.UserRoles"/>
-        <mapping class="se.tfmoney.microservice.oauth.model.token.AuthenticationToken"/>
-        <mapping class="se.tfmoney.microservice.oauth.model.token.NonceToken"/>
+        <mapping class="RegisteredClient"/>
+        <mapping class="ClientURL"/>
+        <mapping class="User"/>
+        <mapping class="UserRoles"/>
+        <mapping class="AuthenticationToken"/>
+        <mapping class="NonceToken"/>
     </session-factory>
 </hibernate-configuration>
