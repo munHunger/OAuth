@@ -27,7 +27,6 @@ public class UserBean
 {
     @POST
     @Path("/user")
-    @NonceRequired
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Create a new user",
                   notes = "Creates a new user at the current OAuth service. All registered clients can create a new user")
@@ -35,8 +34,6 @@ public class UserBean
             value = {@ApiResponse(code = HttpServletResponse.SC_NO_CONTENT, message = "User was created"), @ApiResponse(
                     code = HttpServletResponse.SC_CONFLICT, message = "User already exists")})
     public Response createUser(
-            @HeaderParam("nonce")
-                    String nonce,
             @ApiParam(
                     value = "The identification of the new user. Note that there are not restrictions on minimum length",
                     required = true, defaultValue = "dudeMaster43")
@@ -51,7 +48,10 @@ public class UserBean
             @ApiParam(value = "The identification of the client that is creating the user", required = true,
                       defaultValue = "24MCCM7d9gfg7s8dfg798dg")
             @FormParam("client_id")
-                    String clientID) throws Exception
+                    String clientID,
+            @ApiParam(value = "The phonenumber of the user to be registered", required = true)
+            @FormParam("number")
+                    String number) throws Exception
     {
         Map<String, Object> param = new HashMap<>();
         param.put("username", username);

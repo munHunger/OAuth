@@ -23,6 +23,7 @@ CREATE TABLE `24mssomicro`.`client_url` (
 CREATE TABLE `24mssomicro`.`user` (
   `username` VARCHAR(64) NOT NULL,
   `password` VARCHAR(64) NOT NULL,
+  `number` VARCHAR(12) NOT NULL,
   PRIMARY KEY (`username`),
   UNIQUE INDEX `username_UNIQUE` (`username` ASC));
 
