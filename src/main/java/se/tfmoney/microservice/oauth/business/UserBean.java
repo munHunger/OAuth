@@ -39,17 +39,17 @@ public class UserBean
             @ApiParam(
                     value = "The identification of the new user. Note that there are not restrictions on minimum length",
                     required = true, defaultValue = "dudeMaster43")
-            @QueryParam("username")
+            @FormParam("username")
                     String username,
             @ApiParam(
                     value = "The password of the new user. This will be hashed in the database. Note that there are no restrictions on complexity or length",
                     required = true,
                     defaultValue = "CorrectHorseBatteryStaple")
-            @QueryParam("password")
+            @FormParam("password")
                     String password,
             @ApiParam(value = "The identification of the client that is creating the user", required = true,
                       defaultValue = "24MCCM7d9gfg7s8dfg798dg")
-            @QueryParam("client_id")
+            @FormParam("client_id")
                     String clientID) throws Exception
     {
         Map<String, Object> param = new HashMap<>();

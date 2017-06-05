@@ -57,22 +57,22 @@ public class AuthzBean
             @HeaderParam("nonce")
                     String nonce,
             @ApiParam(value = "The username of the user to authenticate", example = "DudeMaster43")
-            @QueryParam("username")
+            @FormParam("username")
                     String username,
             @ApiParam(value = "The password of the user to authenticate", example = "S0s3cUR3")
-            @QueryParam("password")
+            @FormParam("password")
                     String password,
             @ApiParam(value = "The URL to redirect to. This must be a registered URL for the client",
                       example = "http://localhost:9090/swagger")
-            @QueryParam("redirect_uri")
+            @FormParam("redirect_uri")
                     String redirectUri,
             @ApiParam(value = "The ID of the client to login against", example = "id75pvdb25j3e7dr2d6gjsmplb18v2i2")
-            @QueryParam("client_id")
+            @FormParam("client_id")
                     String clientID,
             @ApiParam(
                     value = "The type of response/authentication to use. If token, then the authentication will be an IMPLICIT_GRANT and the client must support that type. Otherwise it will be a CODE_GRANT",
                     defaultValue = "token", allowableValues = "token, code")
-            @QueryParam("response_type")
+            @FormParam("response_type")
                     String type) throws Exception
     {
         try
