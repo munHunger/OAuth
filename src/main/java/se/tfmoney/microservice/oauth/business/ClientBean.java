@@ -36,8 +36,6 @@ public class ClientBean
                                         message = "The user-friendly name attached to the client noted by the submitted clientID"), @ApiResponse(
             code = HttpServletResponse.SC_NOT_FOUND, message = "Could not find the client noted by the clientID")})
     public Response idToName(
-            @HeaderParam("nonce")
-                    String nonce,
             @PathParam("id")
                     String clientID) throws Exception
     {
