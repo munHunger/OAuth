@@ -1,21 +1,23 @@
 package se.munhunger.oauth.business;
 
+import io.jsonwebtoken.Claims;
 import io.swagger.annotations.*;
 import org.springframework.stereotype.Component;
 import se.munhunger.oauth.model.token.NonceToken;
 import se.munhunger.oauth.model.user.User;
+import se.munhunger.oauth.model.user.UserData;
 import se.munhunger.oauth.model.user.UserRoles;
 import se.munhunger.oauth.util.annotations.NonceRequired;
 import se.munhunger.oauth.util.database.jpa.Database;
+import se.munhunger.oauth.util.jwt.JSONWebToken;
+import se.munhunger.oauth.util.properties.Settings;
 
+import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Marcus Münger on 2017-05-18.
@@ -25,6 +27,25 @@ import java.util.Map;
 @Component
 public class UserBean
 {
+    @RolesAllowed({"USER"})
+    public Response getUserData(
+            @HeaderParam("Authorization")
+                    String accessToken) throws Exception
+    {
+        if (accessToken == null)
+            return Response.status(HttpServletResponse.SC_UNAUTHORIZED).build();
+        if (accessToken.toUpperCase().startsWith("BEARER "))
+            accessToken = accessToken.substring("BEARER ".length());
+
+        Claims claims;
+        claims = JSONWebToken.decryptToken(Settings.getStringSetting("jwt_key"), accessToken);
+        UserData user = new UserData();
+        user.roles = Arrays.asList(claims.getSubject().split(";"));
+        user.username = claims.get("user").toString();
+        user.phoneNumber = claims.get("number").toString();
+        return Response.ok(user).build();
+    }
+
     @POST
     @Path("/user")
     @Produces(MediaType.APPLICATION_JSON)
@@ -65,6 +86,7 @@ public class UserBean
             User newUser = new User();
             newUser.username = username;
             newUser.password = org.apache.commons.codec.digest.DigestUtils.sha256Hex(password);
+            newUser.number = number;
             List objects = new ArrayList<>();
             objects.add(newUser);
             objects.add(new UserRoles(newUser.username, "USER"));

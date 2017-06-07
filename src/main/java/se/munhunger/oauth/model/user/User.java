@@ -32,6 +32,10 @@ public class User
     @XmlElement(name = "password")
     @ApiModelProperty(name = "password", value = "The password of the user. This will be hashed in the database")
     public String password;
+    @Column(name = "number", length = 12)
+    @XmlElement(name = "number")
+    @ApiModelProperty(name = "number", value = "The phonenumber of the user")
+    public String number;
 
     public User()
     {

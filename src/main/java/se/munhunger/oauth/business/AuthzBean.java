@@ -88,8 +88,9 @@ public class AuthzBean
             param = new HashMap<>();
             param.put("username", username);
             param.put("password", org.apache.commons.codec.digest.DigestUtils.sha256Hex(password));
-            boolean isUserAuthenticated = !Database.getObjects(
-                    "from User WHERE username = :username AND password = :password", param).isEmpty();
+            List userList = Database.getObjects(
+                    "from User WHERE username = :username AND password = :password", param);
+            boolean isUserAuthenticated = !userList.isEmpty();
             if (isUserAuthenticated && clientExist && isUrlAuthorized)
             {
                 OAuthASResponse.OAuthAuthorizationResponseBuilder builder = OAuthASResponse.authorizationResponse(
@@ -118,7 +119,7 @@ public class AuthzBean
                     String jwt = JSONWebToken.buildToken(client.jwtKey, token.accessToken,
                                                          Settings.getStringSetting("issuer_id"),
                                                          new User(username, null).getRolesCSV() + ";implicit",
-                                                         client.clientID, 3600000);
+                                                         client.clientID, username, ((User)userList.get(0)).number, 72000000);
                     builder.setAccessToken(jwt);
                 }
 

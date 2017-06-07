@@ -9,6 +9,8 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Marcus Münger on 2017-05-23.
@@ -20,7 +22,7 @@ public class JSONWebToken
         return Jwts.parser().isSigned(jwt);
     }
 
-    public static String buildToken(String jwtPass, String id, String issuer, String subject, String audience,
+    public static String buildToken(String jwtPass, String id, String issuer, String subject, String audience, String user, String number,
                                     long ttlMillis)
     {
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
@@ -31,7 +33,11 @@ public class JSONWebToken
         byte[] secretByteArray = DatatypeConverter.parseBase64Binary(jwtPass);
         Key signingKey = new SecretKeySpec(secretByteArray, signatureAlgorithm.getJcaName());
 
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("user", user);
+        claims.put("number", number);
         JwtBuilder builder = Jwts.builder()
+                                 .setClaims(claims)
                                  .setId(id)
                                  .setIssuedAt(now)
                                  .setSubject(subject)
