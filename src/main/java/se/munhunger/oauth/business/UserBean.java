@@ -9,6 +9,7 @@ import se.munhunger.oauth.model.user.UserData;
 import se.munhunger.oauth.model.user.UserRoles;
 import se.munhunger.oauth.util.database.jpa.Database;
 import se.munhunger.oauth.util.jwt.JSONWebToken;
+import se.munhunger.oauth.util.oauth.OAuthUtils;
 import se.munhunger.oauth.util.properties.Settings;
 
 import javax.annotation.security.RolesAllowed;
@@ -43,6 +44,8 @@ public class UserBean
 			return Response.status(HttpServletResponse.SC_UNAUTHORIZED).build();
 		if(accessToken.toUpperCase().startsWith("BEARER "))
 			accessToken = accessToken.substring("BEARER ".length());
+		if(!JSONWebToken.isSigned(accessToken))
+			accessToken = OAuthUtils.convertToAccessToken(accessToken).accessToken;
 
 		Claims claims;
 		claims = JSONWebToken.decryptToken(Settings.getStringSetting("jwt_key"), accessToken);
