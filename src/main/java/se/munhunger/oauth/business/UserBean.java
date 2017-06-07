@@ -27,7 +27,14 @@ import java.util.*;
 @Component
 public class UserBean
 {
+	@GET
+	@Path("/user")
 	@RolesAllowed({"USER"})
+	@Produces(MediaType.APPLICATION_JSON)
+	@ApiOperation(value = "Gets the information about the logged in user",
+				  notes = "Gets all the saved information about the logged in user")
+	@ApiResponses(
+			value = {@ApiResponse(code = HttpServletResponse.SC_OK, message = "User was created")})
 	public Response getUserData(
 			@HeaderParam("Authorization")
 					String accessToken) throws Exception
