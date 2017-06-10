@@ -1,6 +1,7 @@
 package se.munhunger.oauth;
 
 import se.munhunger.oauth.util.security.JerseyConfig;
+import se.munhunger.oauth.util.ssl.SSLmanager;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -10,14 +11,15 @@ import javax.servlet.ServletContextListener;
  */
 public class Startup implements ServletContextListener
 {
-    @Override
-    public void contextInitialized(ServletContextEvent arg0)
-    {
-        new JerseyConfig();
-    }
+	@Override
+	public void contextInitialized(ServletContextEvent arg0)
+	{
+		SSLmanager.init();
+		new JerseyConfig();
+	}
 
-    @Override
-    public void contextDestroyed(ServletContextEvent arg0)
-    {
-    }
+	@Override
+	public void contextDestroyed(ServletContextEvent arg0)
+	{
+	}
 }
